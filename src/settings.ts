@@ -1,5 +1,6 @@
 import { App, PluginSettingTab, Setting, debounce } from 'obsidian';
 import { PomodoroSettings, DEFAULT_SETTINGS } from './types';
+import { getSoundNames, playSound } from './utils/sound';
 import type PomodoroPlugin from './main';
 
 export class PomodoroSettingTab extends PluginSettingTab {
@@ -98,6 +99,27 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .onChange(async (value) => {
           this.plugin.settings.soundEnabled = value;
           await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName('Sound')
+      .setDesc('Completion sound')
+      .addDropdown(dropdown => {
+        for (const name of getSoundNames()) {
+          dropdown.addOption(name, name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+        }
+        dropdown.setValue(this.plugin.settings.soundFile)
+          .onChange(async (value) => {
+            this.plugin.settings.soundFile = value;
+            await this.plugin.saveSettings();
+            // Preview the sound
+            playSound(value, this.plugin.settings.soundVolume);
+          });
+      })
+      .addButton(btn => btn
+        .setButtonText('Test')
+        .onClick(() => {
+          playSound(this.plugin.settings.soundFile, this.plugin.settings.soundVolume);
         }));
 
     new Setting(containerEl)

@@ -254,6 +254,13 @@ export class PomodoroView extends ItemView {
       timerSection.style.transform = 'scale(1)';
     });
 
+    // Set initial ring preview for idle state
+    if (this.ringCircle) {
+      const initPct = (this.plugin.settings.workDuration / 90) * 100;
+      const initOffset = this.ringCircumference * (1 - initPct / 100);
+      this.ringCircle.setAttribute('stroke-dashoffset', String(initOffset));
+    }
+
     // ===== DURATION PRESETS =====
     this.presetBtns = timerSection.createDiv({ cls: 'pomodoro-presets' });
     this.renderPresets();
@@ -532,6 +539,13 @@ export class PomodoroView extends ItemView {
       this.timerDisplay.setText(formatTime(next * 60));
       this.activePreset = next;
       this.renderPresets();
+
+      // Update ring to show duration proportionally (90min = full ring)
+      if (this.ringCircle) {
+        const pct = (next / 90) * 100;
+        const offset = this.ringCircumference * (1 - pct / 100);
+        this.ringCircle.setAttribute('stroke-dashoffset', String(offset));
+      }
     }
   }
 

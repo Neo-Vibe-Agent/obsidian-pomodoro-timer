@@ -113,6 +113,11 @@ export default class PomodoroPlugin extends Plugin {
       new Notice(`Task done: ${this.activeTask.text}`);
       this.activeTask = null;
       this.timer.setTask(null);
+      // Update all views to clear the task display
+      const status = this.timer.getStatus();
+      this.updateView(status);
+    } else {
+      new Notice('No active task to complete');
     }
   }
 
