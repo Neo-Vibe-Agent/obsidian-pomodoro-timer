@@ -1,0 +1,14 @@
+{
+  "id": "pomodoro",
+  "name": "Pomodoro",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.0",
+  "description": "A beautiful, themeable Pomodoro timer with task sync, calendar integration, and CLI companion.",
+  "author": "Neo Vibe",
+  "authorUrl": "https://neovibe.io",
+  "fundingUrl": {
+    "Buy Me a Coffee": "https://buymeacoffee.com/neovibe",
+    "GitHub Sponsor": "https://github.com/sponsors/Neo-Vibe-Agent"
+  },
+  "isDesktopOnly": false
+}
