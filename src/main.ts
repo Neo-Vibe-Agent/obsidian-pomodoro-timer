@@ -293,17 +293,25 @@ export default class PomodoroPlugin extends Plugin {
     this.calendarSync.updateSettings(this.settings);
     this.cliBridge.updateSettings(this.settings);
 
-    // Live-update theme on open views
+    // Live-update theme + refresh views
     const leaves = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
     for (const leaf of leaves) {
       const view = leaf.view as PomodoroView;
       const container = view.containerEl.children[1];
-      // Remove all theme classes
       container.className = container.className.replace(/pomodoro-theme-\S+/g, '').trim();
       container.addClass(`pomodoro-theme-${this.settings.theme}`);
-      // Update size class
       container.className = container.className.replace(/pomodoro-size-\S+/g, '').trim();
       container.addClass(`pomodoro-size-${this.settings.timerSize}`);
+      // Apply custom colors if set
+      const el = container as HTMLElement;
+      if (this.settings.customPrimary) el.style.setProperty('--pomo-accent', this.settings.customPrimary);
+      else el.style.removeProperty('--pomo-accent');
+      if (this.settings.customSecondary) el.style.setProperty('--pomo-break', this.settings.customSecondary);
+      else el.style.removeProperty('--pomo-break');
+      if (this.settings.customAccentColor) el.style.setProperty('--pomo-ring-color', this.settings.customAccentColor);
+      else el.style.removeProperty('--pomo-ring-color');
+      // Refresh task list in case task sync was toggled
+      view.refreshTasks();
     }
   }
 }

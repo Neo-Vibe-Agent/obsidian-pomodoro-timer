@@ -34,6 +34,11 @@ export interface PomodoroSettings {
   timerSize: 'small' | 'medium' | 'large';
   showInStatusBar: boolean;
 
+  // Custom colors (override theme)
+  customPrimary: string;     // hex, empty = use theme
+  customSecondary: string;   // hex, empty = use theme
+  customAccentColor: string; // hex, empty = use theme
+
   // Interaction
   scrollSensitivity: number;   // 1-5, pixels per minute (mapped)
 
@@ -67,6 +72,9 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   customCss: '',
   timerSize: 'medium',
   showInStatusBar: true,
+  customPrimary: '',
+  customSecondary: '',
+  customAccentColor: '',
   scrollSensitivity: 3,
   notifyOnComplete: true,
   notifySound: true,

@@ -270,6 +270,42 @@ export class PomodoroSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
+    containerEl.createEl('h2', { text: 'Custom Colors' });
+    containerEl.createEl('p', { text: 'Override theme colors. Leave empty to use theme defaults.', cls: 'setting-item-description' });
+
+    new Setting(containerEl)
+      .setName('Primary color')
+      .setDesc('Main accent (timer ring, buttons)')
+      .addText(text => text
+        .setPlaceholder('#2dd4a8')
+        .setValue(this.plugin.settings.customPrimary)
+        .onChange(async (value) => {
+          this.plugin.settings.customPrimary = value;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName('Secondary color')
+      .setDesc('Break state color')
+      .addText(text => text
+        .setPlaceholder('#60a5fa')
+        .setValue(this.plugin.settings.customSecondary)
+        .onChange(async (value) => {
+          this.plugin.settings.customSecondary = value;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName('Accent color')
+      .setDesc('Highlights, active states')
+      .addText(text => text
+        .setPlaceholder('#ff006e')
+        .setValue(this.plugin.settings.customAccentColor)
+        .onChange(async (value) => {
+          this.plugin.settings.customAccentColor = value;
+          await this.plugin.saveSettings();
+        }));
+
     new Setting(containerEl)
       .setName('Scroll sensitivity')
       .setDesc('How sensitive the scroll/drag time adjustment is (1 = least, 5 = most)')

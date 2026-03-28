@@ -93,6 +93,16 @@ export class PomodoroView extends ItemView {
     closeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     closeBtn.addEventListener('click', () => this.leaf.detach());
 
+    // Invert toggle (yin-yang)
+    const invertBtn = headerActions.createEl('button', {
+      cls: 'pomodoro-header-btn pomodoro-invert-btn',
+      attr: { 'aria-label': 'Invert colors', title: 'Invert colors' }
+    });
+    invertBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"/></svg>';
+    invertBtn.addEventListener('click', () => {
+      this.container.toggleClass('pomodoro-inverted', !this.container.hasClass('pomodoro-inverted'));
+    });
+
     // Settings gear
     const settingsBtn = headerActions.createEl('button', {
       cls: 'pomodoro-header-btn',
@@ -237,21 +247,20 @@ export class PomodoroView extends ItemView {
     document.addEventListener('touchmove', this._onTouchMove, { passive: true });
     document.addEventListener('touchend', this._onTouchEnd);
 
-    // Pinch-to-zoom on timer section (like graph view)
-    let lastPinchDist = 0;
-    timerSection.addEventListener('wheel', (e: WheelEvent) => {
+    // Pinch-to-zoom on ring only (not buttons/controls)
+    this.ringWrapper.addEventListener('wheel', (e: WheelEvent) => {
       if (!e.ctrlKey) return; // pinch on trackpad sends ctrl+wheel
       e.preventDefault();
+      e.stopPropagation(); // don't trigger the scroll-to-set handler
       const delta = e.deltaY > 0 ? -0.03 : 0.03;
       this.zoomScale = Math.max(0.5, Math.min(2.0, this.zoomScale + delta));
-      timerSection.style.transform = `scale(${this.zoomScale})`;
-      timerSection.style.transformOrigin = 'center top';
+      this.ringWrapper.style.transform = `scale(${this.zoomScale})`;
     }, { passive: false });
 
-    // Double-click to reset zoom
-    timerSection.addEventListener('dblclick', () => {
+    // Double-click ring to reset zoom
+    this.ringWrapper.addEventListener('dblclick', () => {
       this.zoomScale = 1;
-      timerSection.style.transform = 'scale(1)';
+      this.ringWrapper.style.transform = 'scale(1)';
     });
 
     // Set initial ring preview for idle state
@@ -269,7 +278,7 @@ export class PomodoroView extends ItemView {
     this.primaryBtn = timerSection.createEl('button', { cls: 'pomodoro-primary-btn', text: 'Start' });
     this.primaryBtn.addEventListener('click', () => {
       const state = this.plugin.timer.getStatus().state;
-      if (state === 'idle') this.plugin.startTimer();
+      if (state === 'idle') this.plugin.startTimer(this.selectedMode);
       else if (state === 'paused') this.plugin.resumeTimer();
       else this.plugin.pauseTimer();
     });
@@ -335,8 +344,11 @@ export class PomodoroView extends ItemView {
       this.taskSection.toggleClass('collapsed', !this.taskSection.hasClass('collapsed'));
     });
 
-    // ===== CALENDAR (collapsible) =====
+    // ===== CALENDAR (collapsible, hidden when disabled) =====
     this.calendarSection = c.createDiv({ cls: 'pomodoro-calendar-section pomodoro-collapsible collapsed' });
+    if (!this.plugin.settings.calendarSyncEnabled) {
+      this.calendarSection.style.display = 'none';
+    }
     const calHeader = this.calendarSection.createDiv({ cls: 'pomodoro-section-header' });
     calHeader.createEl('h4', { text: 'Upcoming', cls: 'pomodoro-section-title' });
     const calChevron = calHeader.createSpan({ cls: 'pomodoro-chevron' });
@@ -580,6 +592,7 @@ export class PomodoroView extends ItemView {
       createBtn('Skip', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
       createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     } else if (state === 'short-break' || state === 'long-break') {
+      createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
       createBtn('Skip', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
       createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     } else if (state === 'paused') {

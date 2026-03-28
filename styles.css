@@ -56,7 +56,7 @@ settings:
 /* State ring colors */
 .pomodoro-state-work { --pomo-ring-color: var(--pomo-accent); }
 .pomodoro-state-short-break { --pomo-ring-color: var(--pomo-break); }
-.pomodoro-state-long-break { --pomo-ring-color: var(--pomo-break); }
+.pomodoro-state-long-break { --pomo-ring-color: var(--pomo-break-long, color-mix(in srgb, var(--pomo-break) 65%, black)); }
 .pomodoro-state-paused { --pomo-ring-color: var(--pomo-muted); }
 .pomodoro-state-idle { --pomo-ring-color: var(--pomo-accent); }
 
@@ -184,6 +184,15 @@ settings:
   stroke-width: 6px;
   stroke-linecap: round;
   transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+}
+
+/* Instant ring response when adjusting idle time */
+.pomodoro-state-idle .pomodoro-ring-progress {
+  transition: stroke-dashoffset 0.05s ease-out, stroke 0.3s ease;
+}
+
+.pomodoro-ring-wrapper.dragging .pomodoro-ring-progress {
+  transition: none;
 }
 
 .pomodoro-size-small .pomodoro-ring-bg { stroke-width: 3px; }
@@ -716,33 +725,37 @@ settings:
 
 /* Angel */
 .pomodoro-theme-angel {
-  --pomo-accent: #f5f0e0;
-  --pomo-break: #e8dcc0;
-  --pomo-bg: #fefefe;
-  --pomo-text: #3a3528;
-  --pomo-muted: #b0a890;
-  --pomo-border: #e8e0d0;
-  --pomo-surface: #f8f4ec;
+  --pomo-accent: #c4a862;
+  --pomo-break: #a89050;
+  --pomo-bg: #faf8f4;
+  --pomo-text: #2a2520;
+  --pomo-muted: #8a7e68;
+  --pomo-border: #d8d0c0;
+  --pomo-surface: #f0ece4;
 }
 
 .pomodoro-theme-angel .pomodoro-timer-display {
-  color: #5a5040;
-  text-shadow: 0 0 30px rgba(255, 248, 220, 0.5);
+  color: #3a3020;
 }
 
 .pomodoro-theme-angel .pomodoro-ring-progress {
-  stroke: #d4c8a0;
-  filter: drop-shadow(0 0 4px rgba(255, 248, 200, 0.6));
+  stroke: #c4a862;
+  filter: drop-shadow(0 0 4px rgba(196, 168, 98, 0.4));
 }
 
 .pomodoro-theme-angel .pomodoro-primary-btn {
-  background: #d4c8a0;
-  color: #3a3528;
+  background: #c4a862;
+  color: #2a2520;
 }
 
 .pomodoro-theme-angel .pomodoro-mode-tab.active {
-  background: #d4c8a0;
-  color: #3a3528;
+  background: #c4a862;
+  color: #2a2520;
+}
+
+.pomodoro-theme-angel .pomodoro-secondary-btn {
+  border-color: #c4a862;
+  color: #8a7e68;
 }
 
 /* Ocean */
@@ -840,4 +853,17 @@ settings:
 .pomodoro-btn-extend:hover {
   color: var(--pomo-text);
   border-color: var(--pomo-text);
+}
+
+/* ============================================================ */
+/* INVERT MODE                                                  */
+/* ============================================================ */
+
+.pomodoro-inverted {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Keep SVG ring from double-inverting */
+.pomodoro-inverted .pomodoro-ring-svg {
+  filter: invert(1) hue-rotate(180deg);
 }
