@@ -586,20 +586,37 @@ export class PomodoroView extends ItemView {
       btn.addEventListener('click', (e) => { e.stopPropagation(); onClick(); });
     };
 
-    if (state === 'work') {
-      const ext = this.plugin.settings.extendMinutes || 5;
+    const ext = this.plugin.settings.extendMinutes || 5;
+    const hasTask = !!(this.plugin.timer.getStatus().activeTask);
+
+    // Determine effective state (paused inherits previous context)
+    let effectiveState = state;
+    if (state === 'paused') {
+      const prev = this.plugin.timer.getPreviousState();
+      if (prev === 'short-break' || prev === 'long-break') {
+        effectiveState = prev;
+      } else {
+        effectiveState = 'work';
+      }
+    }
+
+    if (effectiveState === 'work') {
       createBtn(`+${ext}m`, 'pomodoro-btn-extend', () => this.plugin.extendTimer(ext));
-      createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
-      createBtn('Skip', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
-      createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
-    } else if (state === 'short-break' || state === 'long-break') {
-      createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
-      createBtn('Skip', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
-      createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
-    } else if (state === 'paused') {
-      const ext = this.plugin.settings.extendMinutes || 5;
-      createBtn(`+${ext}m`, 'pomodoro-btn-extend', () => this.plugin.extendTimer(ext));
-      createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
+      if (hasTask) {
+        createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
+        createBtn('Skip to Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
+      } else {
+        createBtn('Skip to Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
+        createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
+      }
+    } else if (effectiveState === 'short-break' || effectiveState === 'long-break') {
+      if (hasTask) {
+        createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
+        createBtn('Skip Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
+      } else {
+        createBtn('Skip Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
+        createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
+      }
     }
   }
 

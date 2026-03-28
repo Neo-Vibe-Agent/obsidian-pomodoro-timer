@@ -121,6 +121,10 @@ export class PomodoroTimer {
     return { ...this.status };
   }
 
+  getPreviousState(): TimerState {
+    return this.previousState;
+  }
+
   private startInterval(): void {
     this.stopInterval();
     this.interval = setInterval(() => {
