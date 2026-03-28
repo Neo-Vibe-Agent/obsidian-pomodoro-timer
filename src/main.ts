@@ -108,7 +108,8 @@ export default class PomodoroPlugin extends Plugin {
     this.timer.stop();
     new Notice('Pomodoro stopped');
     this.updateStatusBar('Ready');
-    this.saveTimerState({ state: 'idle', timeRemaining: 0, totalTime: 0, currentPomodoro: 1, completedPomodoros: 0, activeTask: null, startedAt: null });
+    // Nuke saved state so it doesn't restore stale data
+    this.clearTimerState();
   }
 
   skipTimer(): void {
@@ -246,6 +247,14 @@ export default class PomodoroPlugin extends Plugin {
     this.saveTimerState(status);
   }
 
+  private async clearTimerState(): Promise<void> {
+    try {
+      const data = await this.loadData() || {};
+      data._timerState = null;
+      await this.saveData(data);
+    } catch (e) { /* non-critical */ }
+  }
+
   // Timer state persistence
   private async saveTimerState(status: TimerStatus): Promise<void> {
     try {
@@ -277,9 +286,15 @@ export default class PomodoroPlugin extends Plugin {
         return;
       }
 
-      // Actually restore the timer to paused state with adjusted time
-      this.timer.restoreState(saved.state, Math.round(adjustedRemaining), saved.totalTime, saved.completedPomodoros, saved.activeTask);
-      new Notice(`Timer restored: ${formatTime(Math.round(adjustedRemaining))} remaining. Click to resume.`, 8000);
+      // Only restore if the saved state was actually running (not from a stale test)
+      if (adjustedRemaining > 10) { // at least 10 seconds remaining
+        this.timer.restoreState(saved.state, Math.round(adjustedRemaining), saved.totalTime, saved.completedPomodoros, saved.activeTask);
+        new Notice(`Timer restored: ${formatTime(Math.round(adjustedRemaining))} remaining. Click to resume.`, 5000);
+      } else {
+        // Clear stale state
+        data._timerState = null;
+        await this.saveData(data);
+      }
     } catch (e) { /* silent fail */ }
   }
 
