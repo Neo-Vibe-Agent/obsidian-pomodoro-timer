@@ -24,7 +24,6 @@ export interface PomodoroSettings {
   // Calendar
   calendarSyncEnabled: boolean;
   googleCalendarId: string;
-  showUpcomingEvents: boolean;
 
   // CLI
   cliSyncEnabled: boolean;
@@ -32,7 +31,6 @@ export interface PomodoroSettings {
 
   // Theme
   theme: 'default' | 'minimal' | 'neon' | 'forest' | 'orange' | 'matrix' | 'cyberpunk' | 'angel' | 'ocean' | 'city';
-  customCss: string;
   timerSize: 'small' | 'medium' | 'large';
   showInStatusBar: boolean;
 
@@ -69,11 +67,9 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   logFile: 'pomodoro-log.md',
   calendarSyncEnabled: false,
   googleCalendarId: '',
-  showUpcomingEvents: true,
   cliSyncEnabled: false,
   cliStateFile: '.pomodoro-state.json',
   theme: 'default',
-  customCss: '',
   timerSize: 'medium',
   showInStatusBar: true,
   customPrimary: '',

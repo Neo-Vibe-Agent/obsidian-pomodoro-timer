@@ -36,9 +36,10 @@ export class CalendarSync {
       const timeMin = now.toISOString();
       const timeMax = endOfDay.toISOString();
 
-      // Use requestUrl (Obsidian's CORS-safe HTTP client)
+      // Note: requires a Google API key (not just calendar ID) for v2
+      // For now, try the public calendar endpoint which works for public calendars
       const response = await requestUrl({
-        url: `https://www.googleapis.com/calendar/v3/calendars/${calId}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&key=${this.settings.googleCalendarId}`,
+        url: `https://www.googleapis.com/calendar/v3/calendars/${calId}/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
         method: 'GET',
       });
 

@@ -73,7 +73,7 @@ export class PomodoroTimer {
   }
 
   pause(): void {
-    if (this.status.state === 'idle') return;
+    if (this.status.state === 'idle' || this.status.state === 'paused') return;
     this.previousState = this.status.state;
     // Record how much time has elapsed so far
     if (this.status.startedAt) {
@@ -123,6 +123,18 @@ export class PomodoroTimer {
 
   getPreviousState(): TimerState {
     return this.previousState;
+  }
+
+  restoreState(state: TimerState, timeRemaining: number, totalTime: number, completedPomodoros: number, activeTask: string | null): void {
+    this.status.state = 'paused';
+    this.previousState = state;
+    this.status.timeRemaining = timeRemaining;
+    this.status.totalTime = totalTime;
+    this.status.completedPomodoros = completedPomodoros;
+    this.status.activeTask = activeTask;
+    this.status.startedAt = null;
+    this.pausedElapsed = totalTime - timeRemaining;
+    this.emitStateChange();
   }
 
   private startInterval(): void {

@@ -277,7 +277,9 @@ export default class PomodoroPlugin extends Plugin {
         return;
       }
 
-      new Notice(`Timer was running: ${formatTime(Math.round(adjustedRemaining))} remaining. Click the timer to resume.`, 8000);
+      // Actually restore the timer to paused state with adjusted time
+      this.timer.restoreState(saved.state, Math.round(adjustedRemaining), saved.totalTime, saved.completedPomodoros, saved.activeTask);
+      new Notice(`Timer restored: ${formatTime(Math.round(adjustedRemaining))} remaining. Click to resume.`, 8000);
     } catch (e) { /* silent fail */ }
   }
 
@@ -298,11 +300,17 @@ export default class PomodoroPlugin extends Plugin {
 
   // Settings
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const data = await this.loadData() || {};
+    // Separate timer state from settings
+    const { _timerState, ...settingsData } = data;
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, settingsData);
   }
 
   async saveSettings(): Promise<void> {
-    await this.saveData(this.settings);
+    // Preserve _timerState when saving settings
+    const existing = await this.loadData() || {};
+    const merged = { ...this.settings, _timerState: existing._timerState || null };
+    await this.saveData(merged);
     this.timer.updateSettings(this.settings);
     this.taskSync.updateSettings(this.settings);
     this.calendarSync.updateSettings(this.settings);
