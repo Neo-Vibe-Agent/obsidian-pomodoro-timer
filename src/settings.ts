@@ -80,6 +80,18 @@ export class PomodoroSettingTab extends PluginSettingTab {
         }));
 
     new Setting(containerEl)
+      .setName('Extend time')
+      .setDesc('Minutes added by the + button (1-99)')
+      .addSlider(slider => slider
+        .setLimits(1, 99, 1)
+        .setValue(this.plugin.settings.extendMinutes)
+        .setDynamicTooltip()
+        .onChange((value) => {
+          this.plugin.settings.extendMinutes = value;
+          this.debouncedSave();
+        }));
+
+    new Setting(containerEl)
       .setName('Auto-start breaks')
       .setDesc('Automatically start break when pomodoro ends')
       .addToggle(toggle => toggle

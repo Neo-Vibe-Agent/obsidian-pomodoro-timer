@@ -45,9 +45,22 @@ export default class PomodoroPlugin extends Plugin {
 
     // Status bar (always present, acts as show/hide toggle)
     this.statusBarItem = this.addStatusBarItem();
-    this.statusBarItem.setText('Pomodoro: Ready');
+    const name = this.settings.timerName || 'Pomodoro';
+    this.statusBarItem.setText(`${name}: Ready`);
     this.statusBarItem.addClass('pomodoro-statusbar');
-    this.statusBarItem.addEventListener('click', () => this.toggleView());
+    this.statusBarItem.addEventListener('click', () => {
+      this.toggleView();
+      // Update hint text based on new visibility
+      const visible = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE).length > 0;
+      if (visible) {
+        const status = this.timer.getStatus();
+        if (status.state !== 'idle') {
+          this.updateStatusBar(`${getStateLabel(status.state)} ${formatTime(status.timeRemaining)}`);
+        } else {
+          this.updateStatusBar('Ready');
+        }
+      }
+    });
 
     // Commands
     this.addCommand({ id: 'start-pomodoro', name: 'Start pomodoro', callback: () => this.startTimer() });
@@ -109,15 +122,15 @@ export default class PomodoroPlugin extends Plugin {
   }
 
   markTaskDone(): void {
-    if (this.activeTask) {
-      new Notice(`Task done: ${this.activeTask.text}`);
+    const taskName = this.activeTask?.text || this.timer.getStatus().activeTask;
+    if (taskName) {
+      new Notice(`Done: ${taskName}`);
       this.activeTask = null;
       this.timer.setTask(null);
-      // Update all views to clear the task display
       const status = this.timer.getStatus();
       this.updateView(status);
     } else {
-      new Notice('No active task to complete');
+      new Notice('No active task');
     }
   }
 
@@ -138,13 +151,13 @@ export default class PomodoroPlugin extends Plugin {
     for (const leaf of existing) {
       leaf.detach();
     }
-    // Update status bar to show eye icon hint
     if (this.statusBarItem) {
+      const name = this.settings.timerName || 'Pomodoro';
       const state = this.timer.getStatus().state;
       if (state !== 'idle') {
-        this.updateStatusBar(`${getStateLabel(state)} ${formatTime(this.timer.getStatus().timeRemaining)}`);
+        // Timer still running, show time + click to show
+        this.statusBarItem.setText(`${name}: ${getStateLabel(state)} ${formatTime(this.timer.getStatus().timeRemaining)} (click to show)`);
       } else {
-        const name = this.settings.timerName || 'Pomodoro';
         this.statusBarItem.setText(`${name} (click to show)`);
       }
     }

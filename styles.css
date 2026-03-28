@@ -124,6 +124,10 @@ settings:
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pomodoro-mode-tab:hover {
@@ -865,14 +869,17 @@ settings:
 }
 
 /* ============================================================ */
-/* INVERT MODE                                                  */
+/* INVERT MODE (swaps focus/break colors)                       */
 /* ============================================================ */
 
 .pomodoro-inverted {
-  filter: invert(1) hue-rotate(180deg);
+  --pomo-accent-orig: var(--pomo-accent);
+  --pomo-accent: var(--pomo-break);
+  --pomo-break: var(--pomo-accent-orig);
 }
 
-/* Keep SVG ring from double-inverting */
-.pomodoro-inverted .pomodoro-ring-svg {
-  filter: invert(1) hue-rotate(180deg);
-}
+/* Re-apply ring color based on swapped values */
+.pomodoro-inverted.pomodoro-state-work { --pomo-ring-color: var(--pomo-accent); }
+.pomodoro-inverted.pomodoro-state-short-break { --pomo-ring-color: var(--pomo-break); }
+.pomodoro-inverted.pomodoro-state-long-break { --pomo-ring-color: color-mix(in srgb, var(--pomo-break) 65%, black); }
+.pomodoro-inverted.pomodoro-state-idle { --pomo-ring-color: var(--pomo-accent); }

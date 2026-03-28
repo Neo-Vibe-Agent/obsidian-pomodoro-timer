@@ -587,7 +587,8 @@ export class PomodoroView extends ItemView {
     };
 
     if (state === 'work') {
-      createBtn('+5m', 'pomodoro-btn-extend', () => this.plugin.extendTimer(5));
+      const ext = this.plugin.settings.extendMinutes || 5;
+      createBtn(`+${ext}m`, 'pomodoro-btn-extend', () => this.plugin.extendTimer(ext));
       createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
       createBtn('Skip', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
       createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
@@ -596,7 +597,8 @@ export class PomodoroView extends ItemView {
       createBtn('Skip', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
       createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     } else if (state === 'paused') {
-      createBtn('+5m', 'pomodoro-btn-extend', () => this.plugin.extendTimer(5));
+      const ext = this.plugin.settings.extendMinutes || 5;
+      createBtn(`+${ext}m`, 'pomodoro-btn-extend', () => this.plugin.extendTimer(ext));
       createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     }
   }

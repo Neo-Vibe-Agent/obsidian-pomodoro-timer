@@ -57,11 +57,15 @@ export class PomodoroTimer {
     else if (targetMode === 'long-break') duration = this.settings.longBreakDuration * 60;
     else duration = this.settings.workDuration * 60;
 
+    // Safety: ensure duration is valid
+    if (duration <= 0) duration = 25 * 60;
+
     this.status.state = targetMode;
     this.status.timeRemaining = duration;
     this.status.totalTime = duration;
     this.status.startedAt = Date.now();
     this.pausedElapsed = 0;
+    this.previousState = 'idle';
     if (task) this.status.activeTask = task;
 
     this.emitStateChange();

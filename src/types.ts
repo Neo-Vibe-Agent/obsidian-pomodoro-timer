@@ -7,6 +7,7 @@ export interface PomodoroSettings {
   longBreakInterval: number;   // after N pomodoros
   autoStartBreaks: boolean;
   autoStartWork: boolean;
+  extendMinutes: number;       // +time button amount (1-99)
 
   // Sound
   soundEnabled: boolean;
@@ -57,6 +58,7 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   longBreakInterval: 4,
   autoStartBreaks: false,
   autoStartWork: false,
+  extendMinutes: 5,
   soundEnabled: true,
   soundFile: 'bell',
   soundVolume: 0.5,
