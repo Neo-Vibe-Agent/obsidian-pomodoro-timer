@@ -1,4 +1,4 @@
-import { Plugin, Notice, addIcon } from 'obsidian';
+import { Plugin, Notice, Platform } from 'obsidian';
 import { PomodoroSettings, DEFAULT_SETTINGS, TimerStatus, TaskItem } from './types';
 import { PomodoroTimer } from './timer';
 import { TaskSync } from './task-sync';
@@ -21,80 +21,49 @@ export default class PomodoroPlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings();
 
-    // Initialize modules
     this.timer = new PomodoroTimer(this.settings, {
       onTick: (status) => this.handleTick(status),
       onComplete: (status) => this.handleComplete(status),
       onStateChange: (status) => this.handleStateChange(status),
     });
 
-    // Restore timer state if Obsidian was closed mid-session
     await this.restoreTimerState();
 
     this.taskSync = new TaskSync(this.app, this.settings);
     this.calendarSync = new CalendarSync(this.settings);
     this.cliBridge = new CLIBridge(this.app, this.settings, (status) => {
-      // Handle external CLI update
       this.updateView(status);
     });
 
     // Register view
     this.registerView(POMODORO_VIEW_TYPE, (leaf) => new PomodoroView(leaf, this));
 
-    // Add ribbon icon
+    // Ribbon icon
     this.addRibbonIcon('timer', 'Pomodoro', () => {
       this.activateView();
     });
 
-    // Status bar
-    if (this.settings.showInStatusBar) {
-      this.statusBarItem = this.addStatusBarItem();
-      this.statusBarItem.setText('Pomodoro: Ready');
-      this.statusBarItem.addClass('pomodoro-statusbar');
-      this.statusBarItem.addEventListener('click', () => this.activateView());
-    }
+    // Status bar (always present, acts as show/hide toggle)
+    this.statusBarItem = this.addStatusBarItem();
+    this.statusBarItem.setText('Pomodoro: Ready');
+    this.statusBarItem.addClass('pomodoro-statusbar');
+    this.statusBarItem.addEventListener('click', () => this.toggleView());
 
     // Commands
-    this.addCommand({
-      id: 'start-pomodoro',
-      name: 'Start pomodoro',
-      callback: () => this.startTimer(),
-    });
+    this.addCommand({ id: 'start-pomodoro', name: 'Start pomodoro', callback: () => this.startTimer() });
+    this.addCommand({ id: 'pause-pomodoro', name: 'Pause pomodoro', callback: () => this.pauseTimer() });
+    this.addCommand({ id: 'stop-pomodoro', name: 'Stop pomodoro', callback: () => this.stopTimer() });
+    this.addCommand({ id: 'skip-pomodoro', name: 'Skip to next phase', callback: () => this.skipTimer() });
+    this.addCommand({ id: 'open-pomodoro', name: 'Open Pomodoro panel', callback: () => this.activateView() });
+    this.addCommand({ id: 'hide-pomodoro', name: 'Hide Pomodoro panel', callback: () => this.hideView() });
+    this.addCommand({ id: 'toggle-pomodoro', name: 'Toggle Pomodoro panel', callback: () => this.toggleView() });
 
-    this.addCommand({
-      id: 'pause-pomodoro',
-      name: 'Pause pomodoro',
-      callback: () => this.pauseTimer(),
-    });
+    if (Platform.isDesktop) {
+      this.addCommand({ id: 'popout-pomodoro', name: 'Pop out Pomodoro to floating window', callback: () => this.popoutTimer() });
+    }
 
-    this.addCommand({
-      id: 'stop-pomodoro',
-      name: 'Stop pomodoro',
-      callback: () => this.stopTimer(),
-    });
-
-    this.addCommand({
-      id: 'skip-pomodoro',
-      name: 'Skip to next phase',
-      callback: () => this.skipTimer(),
-    });
-
-    this.addCommand({
-      id: 'open-pomodoro',
-      name: 'Open Pomodoro panel',
-      callback: () => this.activateView(),
-    });
-
-    this.addCommand({
-      id: 'popout-pomodoro',
-      name: 'Pop out Pomodoro to floating window',
-      callback: () => this.popoutTimer(),
-    });
-
-    // Settings tab
     this.addSettingTab(new PomodoroSettingTab(this.app, this));
 
-    // Start CLI bridge if enabled
     if (this.settings.cliSyncEnabled) {
       this.cliBridge.startWatching();
     }
@@ -105,7 +74,7 @@ export default class PomodoroPlugin extends Plugin {
     this.cliBridge.destroy();
   }
 
-  // Public control methods (called by view and commands)
+  // Public control methods
   startTimer(mode?: 'work' | 'short-break' | 'long-break'): void {
     this.timer.start(this.activeTask?.text, mode);
     const label = mode === 'short-break' ? 'Short break' : mode === 'long-break' ? 'Long break' : 'Pomodoro';
@@ -126,7 +95,6 @@ export default class PomodoroPlugin extends Plugin {
     this.timer.stop();
     new Notice('Pomodoro stopped');
     this.updateStatusBar('Ready');
-    // Clear persisted state
     this.saveTimerState({ state: 'idle', timeRemaining: 0, totalTime: 0, currentPomodoro: 1, completedPomodoros: 0, activeTask: null, startedAt: null });
   }
 
@@ -154,124 +122,49 @@ export default class PomodoroPlugin extends Plugin {
     new Notice(`Task: ${task.text}`);
   }
 
-  // Event handlers
-  private handleTick(status: TimerStatus): void {
-    this.updateView(status);
-    this.updateStatusBar(`${getStateLabel(status.state)} ${formatTime(status.timeRemaining)}`);
-    this.cliBridge.writeState(status);
-  }
-
-  private async handleComplete(status: TimerStatus): Promise<void> {
-    // Play sound
-    if (this.settings.soundEnabled) {
-      playSound(this.settings.soundFile, this.settings.soundVolume);
-    }
-
-    // System notification
-    if (this.settings.notifySystem) {
-      new Notification('Pomodoro Complete', {
-        body: `${status.completedPomodoros} pomodoro${status.completedPomodoros !== 1 ? 's' : ''} completed. ${getStateLabel(status.state)} time.`,
-        silent: !this.settings.notifySound,
-      });
-    }
-
-    // Obsidian notice
-    if (this.settings.notifyOnComplete) {
-      new Notice(`Pomodoro #${status.completedPomodoros} complete. Time for a ${getStateLabel(status.state).toLowerCase()}.`);
-    }
-
-    // Log pomodoro
-    await this.taskSync.logPomodoro(status.activeTask, this.settings.workDuration);
-
-    // Update task pomodoro count
-    if (this.activeTask) {
-      await this.taskSync.updateTaskPomodoro(this.activeTask);
-    }
-  }
-
-  private handleStateChange(status: TimerStatus): void {
-    this.updateView(status);
-    this.updateStatusBar(`${getStateLabel(status.state)} ${formatTime(status.timeRemaining)}`);
-    this.cliBridge.writeState(status);
-    this.saveTimerState(status);
-  }
-
-  // Timer state persistence
-  private async saveTimerState(status: TimerStatus): Promise<void> {
-    try {
-      const data = await this.loadData() || {};
-      data._timerState = {
-        ...status,
-        savedAt: Date.now(),
-      };
-      await this.saveData(data);
-    } catch (e) {
-      // Silent fail, non-critical
-    }
-  }
-
-  private async restoreTimerState(): Promise<void> {
-    try {
-      const data = await this.loadData();
-      if (!data?._timerState) return;
-
-      const saved = data._timerState;
-      const elapsed = (Date.now() - saved.savedAt) / 1000;
-
-      // Only restore if saved within the last 30 minutes and was active
-      if (elapsed > 30 * 60) return;
-      if (saved.state === 'idle') return;
-
-      const wasRunning = saved.state === 'work' || saved.state === 'short-break' || saved.state === 'long-break';
-      const adjustedRemaining = wasRunning ? Math.max(0, saved.timeRemaining - elapsed) : saved.timeRemaining;
-
-      if (adjustedRemaining <= 0) {
-        // Timer would have completed while closed
-        new Notice(`Pomodoro completed while Obsidian was closed.`);
-        // Clear saved state
-        data._timerState = null;
-        await this.saveData(data);
-        return;
-      }
-
-      // Offer to resume
-      new Notice(
-        `Timer was running: ${formatTime(Math.round(adjustedRemaining))} remaining. Click the timer to resume.`,
-        8000
-      );
-    } catch (e) {
-      // Silent fail
-    }
+  setActiveTaskByName(name: string): void {
+    this.activeTask = { text: name, path: '', line: 0, completed: false };
+    this.timer.setTask(name);
   }
 
   // View management
-  private updateView(status: TimerStatus): void {
-    const leaves = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    for (const leaf of leaves) {
-      const view = leaf.view as PomodoroView;
-      view.updateTimer(status);
+  hideView(): void {
+    const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
+    for (const leaf of existing) {
+      leaf.detach();
+    }
+    // Update status bar to show eye icon hint
+    if (this.statusBarItem) {
+      const state = this.timer.getStatus().state;
+      if (state !== 'idle') {
+        this.updateStatusBar(`${getStateLabel(state)} ${formatTime(this.timer.getStatus().timeRemaining)}`);
+      } else {
+        this.statusBarItem.setText('Pomodoro (click to show)');
+      }
     }
   }
 
-  private updateStatusBar(text: string): void {
-    if (this.statusBarItem) {
-      this.statusBarItem.setText(`Pomodoro: ${text}`);
+  toggleView(): void {
+    const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
+    if (existing.length > 0) {
+      this.hideView();
+    } else {
+      this.activateView();
     }
   }
 
   async popoutTimer(): Promise<void> {
-    // Close any existing instances first
+    if (!Platform.isDesktop) return;
+
     const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
     for (const leaf of existing) {
       leaf.detach();
     }
 
-    // Open in a floating popout window
     const leaf = this.app.workspace.openPopoutLeaf({ size: { width: 340, height: 540 } });
     await leaf.setViewState({ type: POMODORO_VIEW_TYPE, active: true });
     this.app.workspace.revealLeaf(leaf);
 
-    // Focus the popout window so it appears in front
     setTimeout(() => {
       this.app.workspace.revealLeaf(leaf);
       leaf.view?.containerEl?.win?.focus?.();
@@ -292,6 +185,97 @@ export default class PomodoroPlugin extends Plugin {
     }
   }
 
+  // Event handlers
+  private handleTick(status: TimerStatus): void {
+    this.updateView(status);
+    this.updateStatusBar(`${getStateLabel(status.state)} ${formatTime(status.timeRemaining)}`);
+    this.cliBridge.writeState(status);
+  }
+
+  private async handleComplete(status: TimerStatus): Promise<void> {
+    if (this.settings.soundEnabled) {
+      playSound(this.settings.soundFile, this.settings.soundVolume);
+    }
+
+    // System notification (platform-safe)
+    if (this.settings.notifySystem && Platform.isDesktop) {
+      try {
+        new Notification('Pomodoro Complete', {
+          body: `${status.completedPomodoros} pomodoro${status.completedPomodoros !== 1 ? 's' : ''} completed. ${getStateLabel(status.state)} time.`,
+          silent: !this.settings.notifySound,
+        });
+      } catch (e) {
+        // Notification API not available
+      }
+    }
+
+    if (this.settings.notifyOnComplete) {
+      new Notice(`Pomodoro #${status.completedPomodoros} complete. Time for a ${getStateLabel(status.state).toLowerCase()}.`);
+    }
+
+    await this.taskSync.logPomodoro(status.activeTask, this.settings.workDuration);
+
+    if (this.activeTask) {
+      await this.taskSync.updateTaskPomodoro(this.activeTask);
+    }
+  }
+
+  private handleStateChange(status: TimerStatus): void {
+    this.updateView(status);
+    this.updateStatusBar(`${getStateLabel(status.state)} ${formatTime(status.timeRemaining)}`);
+    this.cliBridge.writeState(status);
+    this.saveTimerState(status);
+  }
+
+  // Timer state persistence
+  private async saveTimerState(status: TimerStatus): Promise<void> {
+    try {
+      const data = await this.loadData() || {};
+      data._timerState = { ...status, savedAt: Date.now() };
+      await this.saveData(data);
+    } catch (e) { /* non-critical */ }
+  }
+
+  private async restoreTimerState(): Promise<void> {
+    try {
+      const data = await this.loadData();
+      if (!data?._timerState) return;
+
+      const saved = data._timerState;
+      const elapsed = (Date.now() - saved.savedAt) / 1000;
+
+      // Restore within 120 minutes (supports 90min sessions)
+      if (elapsed > 120 * 60) return;
+      if (saved.state === 'idle') return;
+
+      const wasRunning = saved.state === 'work' || saved.state === 'short-break' || saved.state === 'long-break';
+      const adjustedRemaining = wasRunning ? Math.max(0, saved.timeRemaining - elapsed) : saved.timeRemaining;
+
+      if (adjustedRemaining <= 0) {
+        new Notice('Pomodoro completed while Obsidian was closed.');
+        data._timerState = null;
+        await this.saveData(data);
+        return;
+      }
+
+      new Notice(`Timer was running: ${formatTime(Math.round(adjustedRemaining))} remaining. Click the timer to resume.`, 8000);
+    } catch (e) { /* silent fail */ }
+  }
+
+  private updateView(status: TimerStatus): void {
+    const leaves = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
+    for (const leaf of leaves) {
+      const view = leaf.view as PomodoroView;
+      view.updateTimer(status);
+    }
+  }
+
+  private updateStatusBar(text: string): void {
+    if (this.statusBarItem) {
+      this.statusBarItem.setText(`Pomodoro: ${text}`);
+    }
+  }
+
   // Settings
   async loadSettings(): Promise<void> {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -299,10 +283,22 @@ export default class PomodoroPlugin extends Plugin {
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
-    // Propagate settings to modules
     this.timer.updateSettings(this.settings);
     this.taskSync.updateSettings(this.settings);
     this.calendarSync.updateSettings(this.settings);
     this.cliBridge.updateSettings(this.settings);
+
+    // Live-update theme on open views
+    const leaves = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
+    for (const leaf of leaves) {
+      const view = leaf.view as PomodoroView;
+      const container = view.containerEl.children[1];
+      // Remove all theme classes
+      container.className = container.className.replace(/pomodoro-theme-\S+/g, '').trim();
+      container.addClass(`pomodoro-theme-${this.settings.theme}`);
+      // Update size class
+      container.className = container.className.replace(/pomodoro-size-\S+/g, '').trim();
+      container.addClass(`pomodoro-size-${this.settings.timerSize}`);
+    }
   }
 }

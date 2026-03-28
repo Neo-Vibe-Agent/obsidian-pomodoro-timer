@@ -53,7 +53,7 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   soundEnabled: true,
   soundFile: 'bell',
   soundVolume: 0.5,
-  taskSyncEnabled: true,
+  taskSyncEnabled: false,
   taskSource: 'obsidian-tasks',
   customTaskPath: '',
   logCompletedPomodoros: true,

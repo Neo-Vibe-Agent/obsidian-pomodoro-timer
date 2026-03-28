@@ -77,6 +77,14 @@ export class PomodoroView extends ItemView {
     this.popoutBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
     this.popoutBtn.addEventListener('click', () => this.plugin.popoutTimer());
 
+    // Eye/hide button (minimizes to status bar)
+    const hideBtn = headerActions.createEl('button', {
+      cls: 'pomodoro-header-btn pomodoro-hide-btn',
+      attr: { 'aria-label': 'Hide', title: 'Hide to status bar (click status bar to show)' }
+    });
+    hideBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+    hideBtn.addEventListener('click', () => this.plugin.hideView());
+
     // Close button
     const closeBtn = headerActions.createEl('button', {
       cls: 'pomodoro-header-btn pomodoro-close-btn',
@@ -277,6 +285,42 @@ export class PomodoroView extends ItemView {
     taskHeader.createEl('h4', { text: 'Tasks', cls: 'pomodoro-section-title' });
     const taskChevron = taskHeader.createSpan({ cls: 'pomodoro-chevron' });
     taskChevron.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+    // Quick task input
+    const taskInputWrapper = this.taskSection.createDiv({ cls: 'pomodoro-task-input-wrapper' });
+    const taskInput = taskInputWrapper.createEl('input', {
+      cls: 'pomodoro-task-input',
+      attr: { type: 'text', placeholder: 'Add a task...' }
+    });
+    taskInput.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && taskInput.value.trim()) {
+        const name = taskInput.value.trim();
+        this.plugin.setActiveTaskByName(name);
+        taskInput.value = '';
+        // Show as active task display
+        if (this.taskDisplay) {
+          this.taskDisplay.setText(name);
+          this.taskDisplay.toggleClass('has-task', true);
+        }
+      }
+    });
+    // Click the + icon to submit
+    const taskAddBtn = taskInputWrapper.createEl('button', {
+      cls: 'pomodoro-task-add-btn',
+      attr: { 'aria-label': 'Add task' }
+    });
+    taskAddBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+    taskAddBtn.addEventListener('click', () => {
+      if (taskInput.value.trim()) {
+        const name = taskInput.value.trim();
+        this.plugin.setActiveTaskByName(name);
+        taskInput.value = '';
+        if (this.taskDisplay) {
+          this.taskDisplay.setText(name);
+          this.taskDisplay.toggleClass('has-task', true);
+        }
+      }
+    });
+
     this.taskList = this.taskSection.createDiv({ cls: 'pomodoro-task-list' });
     // Start collapsed
     this.taskSection.addClass('collapsed');

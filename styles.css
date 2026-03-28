@@ -376,6 +376,60 @@ settings:
   border-left: 3px solid var(--pomo-accent);
 }
 
+/* ===== TASK INPUT ===== */
+.pomodoro-task-input-wrapper {
+  display: flex;
+  gap: 4px;
+  padding: 4px 12px 8px;
+  align-items: center;
+}
+
+.pomodoro-task-input {
+  flex: 1;
+  background: var(--pomo-surface);
+  border: 1px solid var(--pomo-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.82em;
+  color: var(--pomo-text);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.pomodoro-task-input:focus {
+  border-color: var(--pomo-accent);
+}
+
+.pomodoro-task-input::placeholder {
+  color: var(--pomo-muted);
+}
+
+.pomodoro-task-add-btn {
+  background: none;
+  border: 1px solid var(--pomo-border);
+  border-radius: 6px;
+  color: var(--pomo-muted);
+  cursor: pointer;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.pomodoro-task-add-btn:hover {
+  color: var(--pomo-accent);
+  border-color: var(--pomo-accent);
+}
+
+/* Collapsed hides input too */
+.collapsed .pomodoro-task-input-wrapper {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
 /* ===== COLLAPSIBLE SECTIONS ===== */
 .pomodoro-section-header {
   display: flex;
