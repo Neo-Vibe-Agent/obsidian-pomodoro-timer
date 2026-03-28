@@ -42,8 +42,7 @@ export class PomodoroView extends ItemView {
   private _onMouseUp: (() => void) | null = null;
   private _onTouchMove: ((e: TouchEvent) => void) | null = null;
   private _onTouchEnd: (() => void) | null = null;
-  private analogHand: SVGLineElement | null = null;
-  private analogDot: SVGCircleElement | null = null;
+  private zoomScale: number = 1;
 
   constructor(leaf: WorkspaceLeaf, plugin: PomodoroPlugin) {
     super(leaf);
@@ -135,42 +134,6 @@ export class PomodoroView extends ItemView {
     this.ringCircle.setAttribute('stroke-dashoffset', '0');
     this.ringCircle.classList.add('pomodoro-ring-progress');
     svg.appendChild(this.ringCircle);
-
-    // Analog hand (optional, toggled via settings)
-    if (this.plugin.settings.analogMode) {
-      const center = viewSize / 2;
-      const handLength = radius - 10;
-
-      this.analogHand = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      this.analogHand.setAttribute('x1', String(center));
-      this.analogHand.setAttribute('y1', String(center));
-      this.analogHand.setAttribute('x2', String(center));
-      this.analogHand.setAttribute('y2', String(center - handLength));
-      this.analogHand.classList.add('pomodoro-analog-hand');
-      svg.appendChild(this.analogHand);
-
-      this.analogDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      this.analogDot.setAttribute('cx', String(center));
-      this.analogDot.setAttribute('cy', String(center));
-      this.analogDot.setAttribute('r', '4');
-      this.analogDot.classList.add('pomodoro-analog-dot');
-      svg.appendChild(this.analogDot);
-
-      // Add tick marks
-      for (let i = 0; i < 12; i++) {
-        const angle = (i * 30) * Math.PI / 180;
-        const outerR = radius - 2;
-        const innerR = i % 3 === 0 ? radius - 12 : radius - 7;
-        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        tick.setAttribute('x1', String(center + innerR * Math.sin(angle)));
-        tick.setAttribute('y1', String(center - innerR * Math.cos(angle)));
-        tick.setAttribute('x2', String(center + outerR * Math.sin(angle)));
-        tick.setAttribute('y2', String(center - outerR * Math.cos(angle)));
-        tick.classList.add('pomodoro-analog-tick');
-        if (i % 3 === 0) tick.classList.add('major');
-        svg.appendChild(tick);
-      }
-    }
 
     this.ringWrapper.appendChild(svg);
 
@@ -266,6 +229,23 @@ export class PomodoroView extends ItemView {
     document.addEventListener('touchmove', this._onTouchMove, { passive: true });
     document.addEventListener('touchend', this._onTouchEnd);
 
+    // Pinch-to-zoom on timer section (like graph view)
+    let lastPinchDist = 0;
+    timerSection.addEventListener('wheel', (e: WheelEvent) => {
+      if (!e.ctrlKey) return; // pinch on trackpad sends ctrl+wheel
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.03 : 0.03;
+      this.zoomScale = Math.max(0.5, Math.min(2.0, this.zoomScale + delta));
+      timerSection.style.transform = `scale(${this.zoomScale})`;
+      timerSection.style.transformOrigin = 'center top';
+    }, { passive: false });
+
+    // Double-click to reset zoom
+    timerSection.addEventListener('dblclick', () => {
+      this.zoomScale = 1;
+      timerSection.style.transform = 'scale(1)';
+    });
+
     // ===== DURATION PRESETS =====
     this.presetBtns = timerSection.createDiv({ cls: 'pomodoro-presets' });
     this.renderPresets();
@@ -353,11 +333,6 @@ export class PomodoroView extends ItemView {
       const offset = this.ringCircumference * (1 - pct / 100);
       this.ringCircle.setAttribute('stroke-dashoffset', String(offset));
 
-      // Analog hand rotation (360 degrees = full timer duration)
-      if (this.analogHand) {
-        const degrees = (pct / 100) * 360;
-        this.analogHand.setAttribute('transform', `rotate(${degrees}, 100, 100)`);
-      }
     }
 
     // Primary button text

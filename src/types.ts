@@ -33,7 +33,6 @@ export interface PomodoroSettings {
   customCss: string;
   timerSize: 'small' | 'medium' | 'large';
   showInStatusBar: boolean;
-  analogMode: boolean;
 
   // Interaction
   scrollSensitivity: number;   // 1-5, pixels per minute (mapped)
@@ -68,7 +67,6 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   customCss: '',
   timerSize: 'medium',
   showInStatusBar: true,
-  analogMode: false,
   scrollSensitivity: 3,
   notifyOnComplete: true,
   notifySound: true,

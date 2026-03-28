@@ -249,16 +249,6 @@ export class PomodoroSettingTab extends PluginSettingTab {
         }));
 
     new Setting(containerEl)
-      .setName('Analog clock')
-      .setDesc('Show analog clock hand and tick marks on the ring')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.analogMode)
-        .onChange(async (value) => {
-          this.plugin.settings.analogMode = value;
-          await this.plugin.saveSettings();
-        }));
-
-    new Setting(containerEl)
       .setName('Scroll sensitivity')
       .setDesc('How sensitive the scroll/drag time adjustment is (1 = least, 5 = most)')
       .addSlider(slider => slider
