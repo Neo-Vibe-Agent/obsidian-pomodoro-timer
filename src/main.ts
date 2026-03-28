@@ -144,7 +144,8 @@ export default class PomodoroPlugin extends Plugin {
       if (state !== 'idle') {
         this.updateStatusBar(`${getStateLabel(state)} ${formatTime(this.timer.getStatus().timeRemaining)}`);
       } else {
-        this.statusBarItem.setText('Pomodoro (click to show)');
+        const name = this.settings.timerName || 'Pomodoro';
+        this.statusBarItem.setText(`${name} (click to show)`);
       }
     }
   }
@@ -277,7 +278,8 @@ export default class PomodoroPlugin extends Plugin {
 
   private updateStatusBar(text: string): void {
     if (this.statusBarItem) {
-      this.statusBarItem.setText(`Pomodoro: ${text}`);
+      const name = this.settings.timerName || 'Pomodoro';
+      this.statusBarItem.setText(`${name}: ${text}`);
     }
   }
 

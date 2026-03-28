@@ -51,6 +51,15 @@ settings:
   background: var(--pomo-bg);
   overflow-y: auto;
   container-type: inline-size;
+  border-radius: 12px;
+}
+
+/* Popout window: soften the whole window */
+.mod-popout .pomodoro-container {
+  border-radius: 16px;
+  margin: 4px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--pomo-border);
 }
 
 /* State ring colors */

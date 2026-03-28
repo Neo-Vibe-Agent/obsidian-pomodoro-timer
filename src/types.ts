@@ -1,5 +1,6 @@
 export interface PomodoroSettings {
   // Timer
+  timerName: string;           // custom name for the timer
   workDuration: number;        // minutes
   shortBreakDuration: number;  // minutes
   longBreakDuration: number;   // minutes
@@ -49,6 +50,7 @@ export interface PomodoroSettings {
 }
 
 export const DEFAULT_SETTINGS: PomodoroSettings = {
+  timerName: 'Pomodoro',
   workDuration: 25,
   shortBreakDuration: 5,
   longBreakDuration: 15,

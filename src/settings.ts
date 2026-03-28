@@ -21,6 +21,17 @@ export class PomodoroSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', { text: 'Timer' });
 
     new Setting(containerEl)
+      .setName('Timer name')
+      .setDesc('Custom name shown in header and status bar')
+      .addText(text => text
+        .setPlaceholder('Pomodoro')
+        .setValue(this.plugin.settings.timerName)
+        .onChange(async (value) => {
+          this.plugin.settings.timerName = value || 'Pomodoro';
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
       .setName('Work duration')
       .setDesc('Minutes per pomodoro')
       .addSlider(slider => slider

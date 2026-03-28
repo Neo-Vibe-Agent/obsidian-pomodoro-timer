@@ -66,7 +66,7 @@ export class PomodoroView extends ItemView {
 
     // ===== HEADER BAR =====
     const header = c.createDiv({ cls: 'pomodoro-header' });
-    header.createSpan({ cls: 'pomodoro-header-title', text: 'Pomodoro' });
+    header.createSpan({ cls: 'pomodoro-header-title', text: this.plugin.settings.timerName || 'Pomodoro' });
     const headerActions = header.createDiv({ cls: 'pomodoro-header-actions' });
 
     // Popout button
