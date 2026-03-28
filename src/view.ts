@@ -180,12 +180,11 @@ export class PomodoroView extends ItemView {
       else this.plugin.pauseTimer();
     });
 
-    // Scroll to adjust time when idle (Cmd+scroll on Mac, no modifier conflict with pinch)
+    // Scroll to adjust time when idle (plain scroll, no modifier needed)
     this.ringWrapper.addEventListener('wheel', (e: WheelEvent) => {
       if (e.ctrlKey) return; // let pinch-to-zoom handler take this
       const state = this.plugin.timer.getStatus().state;
       if (state !== 'idle') return;
-      if (!e.metaKey) return; // require Cmd key (Mac) for time adjust
       e.preventDefault();
       const delta = e.deltaY > 0 ? -1 : 1;
       this.adjustIdleTime(delta);

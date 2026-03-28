@@ -872,14 +872,18 @@ settings:
 /* INVERT MODE (swaps focus/break colors)                       */
 /* ============================================================ */
 
-.pomodoro-inverted {
-  --pomo-accent-orig: var(--pomo-accent);
-  --pomo-accent: var(--pomo-break);
-  --pomo-break: var(--pomo-accent-orig);
-}
+/* Invert works by swapping which state uses which color.
+   Focus states use break color, break states use accent color. */
+.pomodoro-inverted.pomodoro-state-work { --pomo-ring-color: var(--pomo-break); }
+.pomodoro-inverted.pomodoro-state-idle { --pomo-ring-color: var(--pomo-break); }
+.pomodoro-inverted.pomodoro-state-short-break { --pomo-ring-color: var(--pomo-accent); }
+.pomodoro-inverted.pomodoro-state-long-break { --pomo-ring-color: var(--pomo-accent); }
 
-/* Re-apply ring color based on swapped values */
-.pomodoro-inverted.pomodoro-state-work { --pomo-ring-color: var(--pomo-accent); }
-.pomodoro-inverted.pomodoro-state-short-break { --pomo-ring-color: var(--pomo-break); }
-.pomodoro-inverted.pomodoro-state-long-break { --pomo-ring-color: color-mix(in srgb, var(--pomo-break) 65%, black); }
-.pomodoro-inverted.pomodoro-state-idle { --pomo-ring-color: var(--pomo-accent); }
+.pomodoro-inverted .pomodoro-primary-work { background: var(--pomo-break); }
+.pomodoro-inverted .pomodoro-primary-short-break,
+.pomodoro-inverted .pomodoro-primary-long-break { background: var(--pomo-accent); }
+
+.pomodoro-inverted .pomodoro-mode-tab.active { background: var(--pomo-ring-color); }
+
+.pomodoro-inverted .pomodoro-cycle-dot.filled { background: var(--pomo-ring-color); border-color: var(--pomo-ring-color); }
+.pomodoro-inverted .pomodoro-cycle-dot.current { border-color: var(--pomo-ring-color); box-shadow: 0 0 6px var(--pomo-ring-color); }
