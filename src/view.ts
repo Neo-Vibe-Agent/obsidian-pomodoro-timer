@@ -462,7 +462,7 @@ export class PomodoroView extends ItemView {
     this.modeTabs.empty();
 
     const modes = [
-      { id: 'work', label: 'Pomodoro' },
+      { id: 'work', label: 'Focus Time' },
       { id: 'short-break', label: 'Short Break' },
       { id: 'long-break', label: 'Long Break' },
     ];
