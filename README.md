@@ -93,4 +93,4 @@ If this plugin helps you focus, consider supporting development:
 
 ## License
 
-MIT. Built by [Neo Vibe](https://neovibe.io).
+MIT. Built by [NEO](https://neovibe.io).

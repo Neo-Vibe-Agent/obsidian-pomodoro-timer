@@ -4,7 +4,7 @@ import builtins from "builtin-modules";
 
 const banner = `/*
 Pomodoro - A beautiful Pomodoro timer for Obsidian
-by Neo Vibe (https://neovibe.io)
+by NEO (https://neovibe.io)
 MIT License
 */`;
 
