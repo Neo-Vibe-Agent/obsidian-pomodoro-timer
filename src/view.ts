@@ -274,8 +274,9 @@ export class PomodoroView extends ItemView {
     }
 
     if (this.ringCircle) {
-      const pct = getProgressPercentage(status.timeRemaining, status.totalTime);
-      this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - pct / 100)));
+      // Ring counts DOWN: full at start, empty at end
+      const elapsed = getProgressPercentage(status.timeRemaining, status.totalTime);
+      this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (elapsed / 100)));
     }
 
     if (this.primaryBtn) {

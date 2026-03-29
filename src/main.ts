@@ -33,9 +33,22 @@ export default class PomodoroPlugin extends Plugin {
     if (this.settings.showInStatusBar) {
       this.statusBarItem = this.addStatusBarItem();
       const name = this.settings.timerName || 'Pomodoro';
-      this.statusBarItem.setText(`${name}: Ready`);
+      this.statusBarItem.setText(`${name} (click to hide)`);
       this.statusBarItem.addClass('pomodoro-statusbar');
-      this.statusBarItem.addEventListener('click', () => this.toggleView());
+      this.statusBarItem.addEventListener('click', () => {
+        this.toggleView();
+        // Update text after toggle
+        const visible = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE).length > 0;
+        const state = this.timer.getStatus().state;
+        if (visible) {
+          if (state !== 'idle') {
+            this.updateStatusBar(`${getStateLabel(state)} ${formatTime(this.timer.getStatus().timeRemaining)}`);
+          } else {
+            this.statusBarItem!.setText(`${this.settings.timerName || 'Pomodoro'} (click to hide)`);
+          }
+        }
+        // hideView already sets "(click to show)"
+      });
     }
 
     // Commands
