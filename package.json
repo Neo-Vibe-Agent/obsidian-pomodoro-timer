@@ -15,7 +15,7 @@
     "productivity",
     "tasks"
   ],
-  "author": "Neo Vibe <neo@neovibe.io>",
+  "author": "Neo Vibe",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22.0.0",
