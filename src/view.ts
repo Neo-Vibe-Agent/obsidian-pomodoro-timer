@@ -274,13 +274,16 @@ export class PomodoroView extends ItemView {
     }
 
     if (this.ringCircle) {
-      // Ring shows remaining time on a fixed 90-min scale (same as idle preview)
-      // pct = how much of the ring should be FILLED (0 = empty, 1 = full)
-      // offset = how much to HIDE (0 = full ring, circumference = empty ring)
-      const remainingMinutes = status.timeRemaining / 60;
-      const fillRatio = remainingMinutes / 90;
-      const offset = this.ringCircumference * (1 - fillRatio);
-      this.ringCircle.setAttribute('stroke-dashoffset', String(offset));
+      if (status.state === 'idle') {
+        // Idle: show on 90-min scale (for scroll preview feel)
+        const fillRatio = (status.timeRemaining / 60) / 90;
+        this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - fillRatio)));
+      } else {
+        // Running/paused: remaining / total so ring depletes visibly
+        // Starts full, ends empty
+        const fillRatio = status.totalTime > 0 ? status.timeRemaining / status.totalTime : 0;
+        this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - fillRatio)));
+      }
     }
 
     if (this.primaryBtn) {
