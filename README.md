@@ -67,7 +67,7 @@ The count updates automatically when you complete a session with that task selec
 | Clean | Monochrome, thin lines |
 | Neon | Hot pink + cyan, glowing |
 | Forest | Earthy greens |
-| Orange | Warm amber on dark |
+| Citrus | Warm amber on dark |
 | Matrix | Green on black, monospace |
 | Cyberpunk | Blue neon + pink, double glow |
 | Angel | White and gold |

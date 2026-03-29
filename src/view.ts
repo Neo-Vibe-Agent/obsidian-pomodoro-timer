@@ -85,7 +85,7 @@ export class PomodoroView extends ItemView {
     settingsBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
     settingsBtn.addEventListener('click', () => {
       (this.app as any).setting?.open?.();
-      (this.app as any).setting?.openTabById?.('pomodoro-timer');
+      (this.app as any).setting?.openTabById?.('all-in-one-pomodoro');
     });
 
     // Close
@@ -274,9 +274,12 @@ export class PomodoroView extends ItemView {
     }
 
     if (this.ringCircle) {
-      // Ring counts DOWN: full at start, empty at end
-      const elapsed = getProgressPercentage(status.timeRemaining, status.totalTime);
-      this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (elapsed / 100)));
+      // Ring shows remaining time on a fixed 90-min scale (same as idle preview)
+      // This means the ring position doesn't jump when you press Start
+      const remainingMinutes = status.timeRemaining / 60;
+      const pct = remainingMinutes / 90;
+      const offset = this.ringCircumference * (1 - pct);
+      this.ringCircle.setAttribute('stroke-dashoffset', String(offset));
     }
 
     if (this.primaryBtn) {
@@ -421,21 +424,13 @@ export class PomodoroView extends ItemView {
 
     if (effectiveState === 'work') {
       createBtn(`+${ext}m`, 'pomodoro-btn-extend', () => this.plugin.extendTimer(ext));
-      if (hasTask) {
-        createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
-        createBtn('Skip to Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
-      } else {
-        createBtn('Skip to Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
-        createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
-      }
+      createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
+      createBtn('Skip to Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
+      createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     } else {
-      if (hasTask) {
-        createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
-        createBtn('Skip Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
-      } else {
-        createBtn('Skip Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
-        createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
-      }
+      createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
+      createBtn('Skip Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
+      createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     }
   }
 

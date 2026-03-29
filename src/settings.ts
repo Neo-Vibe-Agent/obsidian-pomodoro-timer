@@ -166,7 +166,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .addOption('clean', 'Clean')
         .addOption('neon', 'Neon')
         .addOption('forest', 'Forest')
-        .addOption('orange', 'Orange')
+        .addOption('citrus', 'Citrus')
         .addOption('matrix', 'Matrix')
         .addOption('cyberpunk', 'Cyberpunk')
         .addOption('angel', 'Angel')

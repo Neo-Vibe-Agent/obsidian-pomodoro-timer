@@ -22,7 +22,7 @@ export interface PomodoroSettings {
   logFile: string;
 
   // Theme
-  theme: 'default' | 'clean' | 'neon' | 'forest' | 'orange' | 'matrix' | 'cyberpunk' | 'angel' | 'ocean' | 'city';
+  theme: 'default' | 'clean' | 'neon' | 'forest' | 'citrus' | 'matrix' | 'cyberpunk' | 'angel' | 'ocean' | 'city';
   timerSize: 'small' | 'medium' | 'large';
   showInStatusBar: boolean;
 

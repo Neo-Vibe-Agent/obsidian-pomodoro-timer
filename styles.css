@@ -666,8 +666,8 @@ settings:
 .pomodoro-theme-forest .pomodoro-mode-tab { border-radius: 4px; }
 .pomodoro-theme-forest .pomodoro-preset { border-radius: 4px; }
 
-/* Orange */
-.pomodoro-theme-orange {
+/* Citrus */
+.pomodoro-theme-citrus {
   --pomo-accent: #f97316;
   --pomo-break: #fbbf24;
   --pomo-bg: #1c1007;
@@ -677,7 +677,7 @@ settings:
   --pomo-surface: #2a1a0c;
 }
 
-.pomodoro-theme-orange .pomodoro-ring-progress {
+.pomodoro-theme-citrus .pomodoro-ring-progress {
   filter: drop-shadow(0 0 4px var(--pomo-ring-color));
 }
 
@@ -717,23 +717,23 @@ settings:
 }
 
 .pomodoro-theme-cyberpunk .pomodoro-timer-display {
-  text-shadow: 0 0 15px #00d4ff, 0 0 40px #00d4ff;
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 50px rgba(0, 212, 255, 0.2);
 }
 
 .pomodoro-theme-cyberpunk .pomodoro-ring-progress {
-  filter: drop-shadow(0 0 8px var(--pomo-ring-color)) drop-shadow(0 0 16px var(--pomo-ring-color));
+  filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.4)) drop-shadow(0 0 24px rgba(0, 212, 255, 0.15));
 }
 
 .pomodoro-theme-cyberpunk .pomodoro-primary-btn {
-  box-shadow: 0 0 12px #00d4ff, 0 0 24px color-mix(in srgb, #00d4ff 30%, transparent);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.3), 0 0 32px rgba(0, 212, 255, 0.1);
 }
 
 .pomodoro-theme-cyberpunk .pomodoro-mode-tab.active {
-  box-shadow: 0 0 8px var(--pomo-ring-color);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
 }
 
 .pomodoro-theme-cyberpunk .pomodoro-cycle-dot.filled {
-  box-shadow: 0 0 6px var(--pomo-accent);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
 }
 
 /* Angel */
@@ -748,7 +748,7 @@ settings:
 }
 
 .pomodoro-theme-angel .pomodoro-timer-display {
-  color: #3a3020;
+  color: #ffffff;
 }
 
 .pomodoro-theme-angel .pomodoro-ring-progress {
