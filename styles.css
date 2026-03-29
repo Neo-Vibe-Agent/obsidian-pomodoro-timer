@@ -638,18 +638,18 @@ settings:
 }
 
 /* Minimal */
-.pomodoro-theme-minimal {
+.pomodoro-theme-clean {
   --pomo-accent: var(--text-normal);
   --pomo-break: var(--text-muted);
   --pomo-bg: var(--background-primary);
   --pomo-surface: var(--background-primary-alt);
 }
 
-.pomodoro-theme-minimal .pomodoro-ring-bg { stroke-width: 2px; }
-.pomodoro-theme-minimal .pomodoro-ring-progress { stroke-width: 3px; }
-.pomodoro-theme-minimal .pomodoro-cycle-dot { width: 6px; height: 6px; border-width: 1px; }
-.pomodoro-theme-minimal .pomodoro-mode-tab.active { background: var(--text-normal); color: var(--background-primary); }
-.pomodoro-theme-minimal .pomodoro-primary-btn { border-radius: 4px; }
+.pomodoro-theme-clean .pomodoro-ring-bg { stroke-width: 2px; }
+.pomodoro-theme-clean .pomodoro-ring-progress { stroke-width: 3px; }
+.pomodoro-theme-clean .pomodoro-cycle-dot { width: 6px; height: 6px; border-width: 1px; }
+.pomodoro-theme-clean .pomodoro-mode-tab.active { background: var(--text-normal); color: var(--background-primary); }
+.pomodoro-theme-clean .pomodoro-primary-btn { border-radius: 4px; }
 
 /* Forest */
 .pomodoro-theme-forest {
@@ -810,42 +810,6 @@ settings:
 }
 
 /* ============================================================ */
-/* ANALOG CLOCK                                                 */
-/* ============================================================ */
-
-.pomodoro-analog-hand {
-  stroke: var(--pomo-ring-color);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  transition: transform 1s linear;
-}
-
-.pomodoro-analog-dot {
-  fill: var(--pomo-ring-color);
-}
-
-.pomodoro-analog-tick {
-  stroke: var(--pomo-border);
-  stroke-width: 1.5;
-}
-
-.pomodoro-analog-tick.major {
-  stroke: var(--pomo-muted);
-  stroke-width: 2;
-}
-
-/* Neon/Cyberpunk analog glow */
-.pomodoro-theme-neon .pomodoro-analog-hand,
-.pomodoro-theme-cyberpunk .pomodoro-analog-hand {
-  filter: drop-shadow(0 0 4px var(--pomo-ring-color));
-}
-
-.pomodoro-theme-neon .pomodoro-analog-dot,
-.pomodoro-theme-cyberpunk .pomodoro-analog-dot {
-  filter: drop-shadow(0 0 4px var(--pomo-ring-color));
-}
-
-/* ============================================================ */
 /* BUTTON VARIANTS                                              */
 /* ============================================================ */
 
@@ -868,22 +832,3 @@ settings:
   border-color: var(--pomo-text);
 }
 
-/* ============================================================ */
-/* INVERT MODE (swaps focus/break colors)                       */
-/* ============================================================ */
-
-/* Invert works by swapping which state uses which color.
-   Focus states use break color, break states use accent color. */
-.pomodoro-inverted.pomodoro-state-work { --pomo-ring-color: var(--pomo-break); }
-.pomodoro-inverted.pomodoro-state-idle { --pomo-ring-color: var(--pomo-break); }
-.pomodoro-inverted.pomodoro-state-short-break { --pomo-ring-color: var(--pomo-accent); }
-.pomodoro-inverted.pomodoro-state-long-break { --pomo-ring-color: var(--pomo-accent); }
-
-.pomodoro-inverted .pomodoro-primary-work { background: var(--pomo-break); }
-.pomodoro-inverted .pomodoro-primary-short-break,
-.pomodoro-inverted .pomodoro-primary-long-break { background: var(--pomo-accent); }
-
-.pomodoro-inverted .pomodoro-mode-tab.active { background: var(--pomo-ring-color); }
-
-.pomodoro-inverted .pomodoro-cycle-dot.filled { background: var(--pomo-ring-color); border-color: var(--pomo-ring-color); }
-.pomodoro-inverted .pomodoro-cycle-dot.current { border-color: var(--pomo-ring-color); box-shadow: 0 0 6px var(--pomo-ring-color); }

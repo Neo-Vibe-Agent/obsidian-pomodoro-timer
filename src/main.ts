@@ -2,8 +2,6 @@ import { Plugin, Notice, Platform } from 'obsidian';
 import { PomodoroSettings, DEFAULT_SETTINGS, TimerStatus, TaskItem } from './types';
 import { PomodoroTimer } from './timer';
 import { TaskSync } from './task-sync';
-import { CalendarSync } from './calendar-sync';
-import { CLIBridge } from './cli-bridge';
 import { PomodoroSettingTab } from './settings';
 import { PomodoroView, POMODORO_VIEW_TYPE } from './view';
 import { formatTime, getStateLabel } from './utils/format';
@@ -13,8 +11,6 @@ export default class PomodoroPlugin extends Plugin {
   settings: PomodoroSettings;
   timer: PomodoroTimer;
   taskSync: TaskSync;
-  calendarSync: CalendarSync;
-  cliBridge: CLIBridge;
   private statusBarItem: HTMLElement | null = null;
   private activeTask: TaskItem | null = null;
 
@@ -27,40 +23,20 @@ export default class PomodoroPlugin extends Plugin {
       onStateChange: (status) => this.handleStateChange(status),
     });
 
-    await this.restoreTimerState();
-
     this.taskSync = new TaskSync(this.app, this.settings);
-    this.calendarSync = new CalendarSync(this.settings);
-    this.cliBridge = new CLIBridge(this.app, this.settings, (status) => {
-      this.updateView(status);
-    });
 
-    // Register view
     this.registerView(POMODORO_VIEW_TYPE, (leaf) => new PomodoroView(leaf, this));
 
-    // Ribbon icon
-    this.addRibbonIcon('timer', 'Pomodoro', () => {
-      this.activateView();
-    });
+    this.addRibbonIcon('timer', 'Pomodoro', () => this.activateView());
 
-    // Status bar (always present, acts as show/hide toggle)
-    this.statusBarItem = this.addStatusBarItem();
-    const name = this.settings.timerName || 'Pomodoro';
-    this.statusBarItem.setText(`${name}: Ready`);
-    this.statusBarItem.addClass('pomodoro-statusbar');
-    this.statusBarItem.addEventListener('click', () => {
-      this.toggleView();
-      // Update hint text based on new visibility
-      const visible = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE).length > 0;
-      if (visible) {
-        const status = this.timer.getStatus();
-        if (status.state !== 'idle') {
-          this.updateStatusBar(`${getStateLabel(status.state)} ${formatTime(status.timeRemaining)}`);
-        } else {
-          this.updateStatusBar('Ready');
-        }
-      }
-    });
+    // Status bar
+    if (this.settings.showInStatusBar) {
+      this.statusBarItem = this.addStatusBarItem();
+      const name = this.settings.timerName || 'Pomodoro';
+      this.statusBarItem.setText(`${name}: Ready`);
+      this.statusBarItem.addClass('pomodoro-statusbar');
+      this.statusBarItem.addEventListener('click', () => this.toggleView());
+    }
 
     // Commands
     this.addCommand({ id: 'start-pomodoro', name: 'Start pomodoro', callback: () => this.startTimer() });
@@ -72,44 +48,37 @@ export default class PomodoroPlugin extends Plugin {
     this.addCommand({ id: 'toggle-pomodoro', name: 'Toggle Pomodoro panel', callback: () => this.toggleView() });
 
     if (Platform.isDesktop) {
-      this.addCommand({ id: 'popout-pomodoro', name: 'Pop out Pomodoro to floating window', callback: () => this.popoutTimer() });
+      this.addCommand({ id: 'popout-pomodoro', name: 'Pop out to floating window', callback: () => this.popoutTimer() });
     }
 
     this.addSettingTab(new PomodoroSettingTab(this.app, this));
-
-    if (this.settings.cliSyncEnabled) {
-      this.cliBridge.startWatching();
-    }
   }
 
   async onunload(): Promise<void> {
     this.timer.destroy();
-    this.cliBridge.destroy();
   }
 
-  // Public control methods
+  // Controls
   startTimer(mode?: 'work' | 'short-break' | 'long-break'): void {
     this.timer.start(this.activeTask?.text, mode);
-    const label = mode === 'short-break' ? 'Short break' : mode === 'long-break' ? 'Long break' : 'Pomodoro';
+    const label = mode === 'short-break' ? 'Short break' : mode === 'long-break' ? 'Long break' : 'Focus time';
     new Notice(`${label} started`);
   }
 
   pauseTimer(): void {
     this.timer.pause();
-    new Notice('Pomodoro paused');
+    new Notice('Paused');
   }
 
   resumeTimer(): void {
     this.timer.resume();
-    new Notice('Pomodoro resumed');
+    new Notice('Resumed');
   }
 
   stopTimer(): void {
     this.timer.stop();
-    new Notice('Pomodoro stopped');
+    new Notice('Timer reset');
     this.updateStatusBar('Ready');
-    // Nuke saved state so it doesn't restore stale data
-    this.clearTimerState();
   }
 
   skipTimer(): void {
@@ -119,7 +88,7 @@ export default class PomodoroPlugin extends Plugin {
 
   extendTimer(minutes: number): void {
     this.timer.extend(minutes);
-    new Notice(`Extended by ${minutes} minutes`);
+    new Notice(`+${minutes} minutes`);
   }
 
   markTaskDone(): void {
@@ -128,8 +97,7 @@ export default class PomodoroPlugin extends Plugin {
       new Notice(`Done: ${taskName}`);
       this.activeTask = null;
       this.timer.setTask(null);
-      const status = this.timer.getStatus();
-      this.updateView(status);
+      this.updateView(this.timer.getStatus());
     } else {
       new Notice('No active task');
     }
@@ -149,14 +117,11 @@ export default class PomodoroPlugin extends Plugin {
   // View management
   hideView(): void {
     const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    for (const leaf of existing) {
-      leaf.detach();
-    }
+    for (const leaf of existing) leaf.detach();
     if (this.statusBarItem) {
       const name = this.settings.timerName || 'Pomodoro';
       const state = this.timer.getStatus().state;
       if (state !== 'idle') {
-        // Timer still running, show time + click to show
         this.statusBarItem.setText(`${name}: ${getStateLabel(state)} ${formatTime(this.timer.getStatus().timeRemaining)} (click to show)`);
       } else {
         this.statusBarItem.setText(`${name} (click to show)`);
@@ -166,38 +131,22 @@ export default class PomodoroPlugin extends Plugin {
 
   toggleView(): void {
     const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    if (existing.length > 0) {
-      this.hideView();
-    } else {
-      this.activateView();
-    }
+    existing.length > 0 ? this.hideView() : this.activateView();
   }
 
   async popoutTimer(): Promise<void> {
     if (!Platform.isDesktop) return;
-
     const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    for (const leaf of existing) {
-      leaf.detach();
-    }
-
+    for (const leaf of existing) leaf.detach();
     const leaf = this.app.workspace.openPopoutLeaf({ size: { width: 340, height: 540 } });
     await leaf.setViewState({ type: POMODORO_VIEW_TYPE, active: true });
     this.app.workspace.revealLeaf(leaf);
-
-    setTimeout(() => {
-      this.app.workspace.revealLeaf(leaf);
-      leaf.view?.containerEl?.win?.focus?.();
-    }, 200);
+    setTimeout(() => { leaf.view?.containerEl?.win?.focus?.(); }, 200);
   }
 
   async activateView(): Promise<void> {
     const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    if (existing.length > 0) {
-      this.app.workspace.revealLeaf(existing[0]);
-      return;
-    }
-
+    if (existing.length > 0) { this.app.workspace.revealLeaf(existing[0]); return; }
     const leaf = this.app.workspace.getRightLeaf(false);
     if (leaf) {
       await leaf.setViewState({ type: POMODORO_VIEW_TYPE, active: true });
@@ -209,32 +158,24 @@ export default class PomodoroPlugin extends Plugin {
   private handleTick(status: TimerStatus): void {
     this.updateView(status);
     this.updateStatusBar(`${getStateLabel(status.state)} ${formatTime(status.timeRemaining)}`);
-    this.cliBridge.writeState(status);
   }
 
   private async handleComplete(status: TimerStatus): Promise<void> {
     if (this.settings.soundEnabled) {
       playSound(this.settings.soundFile, this.settings.soundVolume);
     }
-
-    // System notification (platform-safe)
     if (this.settings.notifySystem && Platform.isDesktop) {
       try {
         new Notification('Pomodoro Complete', {
-          body: `${status.completedPomodoros} pomodoro${status.completedPomodoros !== 1 ? 's' : ''} completed. ${getStateLabel(status.state)} time.`,
+          body: `${status.completedPomodoros} pomodoro${status.completedPomodoros !== 1 ? 's' : ''} completed.`,
           silent: !this.settings.notifySound,
         });
-      } catch (e) {
-        // Notification API not available
-      }
+      } catch (e) { /* not available */ }
     }
-
     if (this.settings.notifyOnComplete) {
-      new Notice(`Pomodoro #${status.completedPomodoros} complete. Time for a ${getStateLabel(status.state).toLowerCase()}.`);
+      new Notice(`Pomodoro #${status.completedPomodoros} complete. ${getStateLabel(status.state)} time.`);
     }
-
     await this.taskSync.logPomodoro(status.activeTask, this.settings.workDuration);
-
     if (this.activeTask) {
       await this.taskSync.updateTaskPomodoro(this.activeTask);
     }
@@ -243,112 +184,43 @@ export default class PomodoroPlugin extends Plugin {
   private handleStateChange(status: TimerStatus): void {
     this.updateView(status);
     this.updateStatusBar(`${getStateLabel(status.state)} ${formatTime(status.timeRemaining)}`);
-    this.cliBridge.writeState(status);
-    this.saveTimerState(status);
-  }
-
-  private async clearTimerState(): Promise<void> {
-    try {
-      const data = await this.loadData() || {};
-      data._timerState = null;
-      await this.saveData(data);
-    } catch (e) { /* non-critical */ }
-  }
-
-  // Timer state persistence
-  private async saveTimerState(status: TimerStatus): Promise<void> {
-    try {
-      const data = await this.loadData() || {};
-      data._timerState = { ...status, savedAt: Date.now() };
-      await this.saveData(data);
-    } catch (e) { /* non-critical */ }
-  }
-
-  private async restoreTimerState(): Promise<void> {
-    try {
-      const data = await this.loadData();
-      if (!data?._timerState) return;
-
-      const saved = data._timerState;
-      const elapsed = (Date.now() - saved.savedAt) / 1000;
-
-      // Restore within 120 minutes (supports 90min sessions)
-      if (elapsed > 120 * 60) return;
-      if (saved.state === 'idle') return;
-
-      const wasRunning = saved.state === 'work' || saved.state === 'short-break' || saved.state === 'long-break';
-      const adjustedRemaining = wasRunning ? Math.max(0, saved.timeRemaining - elapsed) : saved.timeRemaining;
-
-      if (adjustedRemaining <= 0) {
-        new Notice('Pomodoro completed while Obsidian was closed.');
-        data._timerState = null;
-        await this.saveData(data);
-        return;
-      }
-
-      // Only restore if the saved state was actually running (not from a stale test)
-      if (adjustedRemaining > 10) { // at least 10 seconds remaining
-        this.timer.restoreState(saved.state, Math.round(adjustedRemaining), saved.totalTime, saved.completedPomodoros, saved.activeTask);
-        new Notice(`Timer restored: ${formatTime(Math.round(adjustedRemaining))} remaining. Click to resume.`, 5000);
-      } else {
-        // Clear stale state
-        data._timerState = null;
-        await this.saveData(data);
-      }
-    } catch (e) { /* silent fail */ }
   }
 
   private updateView(status: TimerStatus): void {
-    const leaves = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    for (const leaf of leaves) {
-      const view = leaf.view as PomodoroView;
-      view.updateTimer(status);
+    for (const leaf of this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE)) {
+      (leaf.view as PomodoroView).updateTimer(status);
     }
   }
 
   private updateStatusBar(text: string): void {
     if (this.statusBarItem) {
-      const name = this.settings.timerName || 'Pomodoro';
-      this.statusBarItem.setText(`${name}: ${text}`);
+      this.statusBarItem.setText(`${this.settings.timerName || 'Pomodoro'}: ${text}`);
     }
   }
 
   // Settings
   async loadSettings(): Promise<void> {
-    const data = await this.loadData() || {};
-    // Separate timer state from settings
-    const { _timerState, ...settingsData } = data;
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, settingsData);
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
 
   async saveSettings(): Promise<void> {
-    // Preserve _timerState when saving settings
-    const existing = await this.loadData() || {};
-    const merged = { ...this.settings, _timerState: existing._timerState || null };
-    await this.saveData(merged);
+    await this.saveData(this.settings);
     this.timer.updateSettings(this.settings);
     this.taskSync.updateSettings(this.settings);
-    this.calendarSync.updateSettings(this.settings);
-    this.cliBridge.updateSettings(this.settings);
-
-    // Live-update theme + refresh views
-    const leaves = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    for (const leaf of leaves) {
+    // Live-update views
+    for (const leaf of this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE)) {
       const view = leaf.view as PomodoroView;
-      const container = view.containerEl.children[1];
+      const container = view.containerEl.children[1] as HTMLElement;
       container.className = container.className.replace(/pomodoro-theme-\S+/g, '').trim();
       container.addClass(`pomodoro-theme-${this.settings.theme}`);
       container.className = container.className.replace(/pomodoro-size-\S+/g, '').trim();
       container.addClass(`pomodoro-size-${this.settings.timerSize}`);
-      // Apply custom colors if set
-      const el = container as HTMLElement;
-      if (this.settings.customPrimary) el.style.setProperty('--pomo-accent', this.settings.customPrimary);
-      else el.style.removeProperty('--pomo-accent');
-      if (this.settings.customSecondary) el.style.setProperty('--pomo-break', this.settings.customSecondary);
-      else el.style.removeProperty('--pomo-break');
-      if (this.settings.customAccentColor) el.style.setProperty('--pomo-ring-color', this.settings.customAccentColor);
-      else el.style.removeProperty('--pomo-ring-color');
-      // Refresh task list in case task sync was toggled
+      if (this.settings.customPrimary) container.style.setProperty('--pomo-accent', this.settings.customPrimary);
+      else container.style.removeProperty('--pomo-accent');
+      if (this.settings.customSecondary) container.style.setProperty('--pomo-break', this.settings.customSecondary);
+      else container.style.removeProperty('--pomo-break');
+      if (this.settings.customAccentColor) container.style.setProperty('--pomo-ring-color', this.settings.customAccentColor);
+      else container.style.removeProperty('--pomo-ring-color');
       view.refreshTasks();
     }
   }

@@ -1,46 +1,38 @@
 export interface PomodoroSettings {
   // Timer
-  timerName: string;           // custom name for the timer
-  workDuration: number;        // minutes
-  shortBreakDuration: number;  // minutes
-  longBreakDuration: number;   // minutes
-  longBreakInterval: number;   // after N pomodoros
+  timerName: string;
+  workDuration: number;
+  shortBreakDuration: number;
+  longBreakDuration: number;
+  longBreakInterval: number;
   autoStartBreaks: boolean;
   autoStartWork: boolean;
-  extendMinutes: number;       // +time button amount (1-99)
+  extendMinutes: number;
 
   // Sound
   soundEnabled: boolean;
-  soundFile: string;           // path to custom sound or built-in name
-  soundVolume: number;         // 0-1
+  soundFile: string;
+  soundVolume: number;
 
   // Tasks
   taskSyncEnabled: boolean;
-  taskSource: 'obsidian-tasks' | 'dataview' | 'custom-path';
-  customTaskPath: string;      // vault-relative path for custom task source
+  taskSource: 'obsidian-tasks' | 'custom-path';
+  customTaskPath: string;
   logCompletedPomodoros: boolean;
-  logFile: string;             // vault-relative path for log
-
-  // Calendar
-  calendarSyncEnabled: boolean;
-  googleCalendarId: string;
-
-  // CLI
-  cliSyncEnabled: boolean;
-  cliStateFile: string;        // vault-relative path for shared state
+  logFile: string;
 
   // Theme
-  theme: 'default' | 'minimal' | 'neon' | 'forest' | 'orange' | 'matrix' | 'cyberpunk' | 'angel' | 'ocean' | 'city';
+  theme: 'default' | 'clean' | 'neon' | 'forest' | 'orange' | 'matrix' | 'cyberpunk' | 'angel' | 'ocean' | 'city';
   timerSize: 'small' | 'medium' | 'large';
   showInStatusBar: boolean;
 
-  // Custom colors (override theme)
-  customPrimary: string;     // hex, empty = use theme
-  customSecondary: string;   // hex, empty = use theme
-  customAccentColor: string; // hex, empty = use theme
+  // Custom colors
+  customPrimary: string;
+  customSecondary: string;
+  customAccentColor: string;
 
   // Interaction
-  scrollSensitivity: number;   // 1-5, pixels per minute (mapped)
+  scrollSensitivity: number;
 
   // Notifications
   notifyOnComplete: boolean;
@@ -65,10 +57,6 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   customTaskPath: '',
   logCompletedPomodoros: true,
   logFile: 'pomodoro-log.md',
-  calendarSyncEnabled: false,
-  googleCalendarId: '',
-  cliSyncEnabled: false,
-  cliStateFile: '.pomodoro-state.json',
   theme: 'default',
   timerSize: 'medium',
   showInStatusBar: true,
@@ -85,12 +73,12 @@ export type TimerState = 'idle' | 'work' | 'short-break' | 'long-break' | 'pause
 
 export interface TimerStatus {
   state: TimerState;
-  timeRemaining: number;     // seconds
-  totalTime: number;         // seconds
-  currentPomodoro: number;   // which pomodoro in the cycle (1-based)
+  timeRemaining: number;
+  totalTime: number;
+  currentPomodoro: number;
   completedPomodoros: number;
   activeTask: string | null;
-  startedAt: number | null;  // timestamp
+  startedAt: number | null;
 }
 
 export interface TaskItem {
@@ -100,26 +88,4 @@ export interface TaskItem {
   completed: boolean;
   estimatedPomodoros?: number;
   completedPomodoros?: number;
-}
-
-export interface CalendarEvent {
-  title: string;
-  start: Date;
-  end: Date;
-  isAllDay: boolean;
-}
-
-export interface PomodoroLogEntry {
-  date: string;
-  startTime: string;
-  endTime: string;
-  duration: number;
-  task: string | null;
-  completed: boolean;
-}
-
-export interface CLIState {
-  timer: TimerStatus;
-  lastUpdated: number;
-  source: 'obsidian' | 'cli';
 }

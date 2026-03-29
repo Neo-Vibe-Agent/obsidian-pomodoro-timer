@@ -19,9 +19,7 @@ export class TaskSync {
 
     switch (this.settings.taskSource) {
       case 'obsidian-tasks':
-        return this.getObsidianTasks();
-      case 'dataview':
-        return this.getDataviewTasks();
+        return this.getActiveFileTasks();
       case 'custom-path':
         return this.getCustomPathTasks();
       default:
@@ -29,85 +27,22 @@ export class TaskSync {
     }
   }
 
-  private async getObsidianTasks(): Promise<TaskItem[]> {
-    const tasks: TaskItem[] = [];
-    const files = this.app.vault.getMarkdownFiles();
-
-    for (const file of files) {
-      const cache = this.app.metadataCache.getFileCache(file);
-      if (!cache?.listItems) continue;
-
-      // Only read file content if there are unchecked tasks
-      const hasUncompletedTasks = cache.listItems.some(item => item.task === ' ');
-      if (!hasUncompletedTasks) continue;
-
-      const content = await this.app.vault.cachedRead(file);
-      const lines = content.split('\n');
-
-      for (const item of cache.listItems) {
-        if (item.task !== ' ') continue; // Only uncompleted tasks
-
-        const lineNum = item.position.start.line;
-        const line = lines[lineNum];
-        if (!line) continue;
-
-        const text = line.replace(/^(\s*)- \[ \] /, '').trim();
-        if (text.length === 0) continue;
-
-        const pomoMatch = text.match(/\[pomo::\s*(\d+)\/(\d+)\]/);
-        tasks.push({
-          text: text.replace(/\[pomo::\s*\d+\/\d+\]/, '').trim(),
-          path: file.path,
-          line: lineNum,
-          completed: false,
-          estimatedPomodoros: pomoMatch ? parseInt(pomoMatch[2]) : undefined,
-          completedPomodoros: pomoMatch ? parseInt(pomoMatch[1]) : 0,
-        });
-      }
-    }
-
-    return tasks;
-  }
-
-  private async getDataviewTasks(): Promise<TaskItem[]> {
-    // DataView integration: read tasks via the metadata cache
-    const tasks: TaskItem[] = [];
-    const files = this.app.vault.getMarkdownFiles();
-
-    for (const file of files) {
-      const cache = this.app.metadataCache.getFileCache(file);
-      if (!cache?.listItems) continue;
-
-      const content = await this.app.vault.cachedRead(file);
-      const lines = content.split('\n');
-
-      for (const item of cache.listItems) {
-        if (item.task && item.task === ' ') {
-          const line = lines[item.position.start.line];
-          const text = line.replace(/^(\s*)- \[ \] /, '').trim();
-          if (text.length === 0) continue;
-
-          tasks.push({
-            text,
-            path: file.path,
-            line: item.position.start.line,
-            completed: false,
-          });
-        }
-      }
-    }
-
-    return tasks;
+  // Read tasks from the currently active file only (no vault-wide scan)
+  private async getActiveFileTasks(): Promise<TaskItem[]> {
+    const activeFile = this.app.workspace.getActiveFile();
+    if (!activeFile) return [];
+    return this.readTasksFromFile(activeFile);
   }
 
   private async getCustomPathTasks(): Promise<TaskItem[]> {
     if (!this.settings.customTaskPath) return [];
-
-    const tasks: TaskItem[] = [];
     const file = this.app.vault.getAbstractFileByPath(this.settings.customTaskPath);
+    if (!(file instanceof TFile)) return [];
+    return this.readTasksFromFile(file);
+  }
 
-    if (!(file instanceof TFile)) return tasks;
-
+  private async readTasksFromFile(file: TFile): Promise<TaskItem[]> {
+    const tasks: TaskItem[] = [];
     const content = await this.app.vault.cachedRead(file);
     const lines = content.split('\n');
 
@@ -115,11 +50,17 @@ export class TaskSync {
       const line = lines[i];
       const match = line.match(/^(\s*)- \[ \] (.+)$/);
       if (match) {
+        const text = match[2].trim();
+        if (text.length === 0) continue;
+
+        const pomoMatch = text.match(/\[pomo::\s*(\d+)\/(\d+)\]/);
         tasks.push({
-          text: match[2].trim(),
+          text: text.replace(/\[pomo::\s*\d+\/\d+\]/, '').trim(),
           path: file.path,
           line: i,
           completed: false,
+          estimatedPomodoros: pomoMatch ? parseInt(pomoMatch[2]) : undefined,
+          completedPomodoros: pomoMatch ? parseInt(pomoMatch[1]) : 0,
         });
       }
     }
@@ -133,7 +74,6 @@ export class TaskSync {
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0];
     const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-
     const entry = `| ${dateStr} | ${timeStr} | ${duration}min | ${task || 'No task'} |`;
 
     let file = this.app.vault.getAbstractFileByPath(this.settings.logFile);
@@ -148,23 +88,21 @@ export class TaskSync {
   }
 
   async updateTaskPomodoro(task: TaskItem): Promise<void> {
+    if (!task.path) return; // Custom input tasks have no file path
     const file = this.app.vault.getAbstractFileByPath(task.path);
     if (!(file instanceof TFile)) return;
 
     const content = await this.app.vault.read(file);
     const lines = content.split('\n');
     const line = lines[task.line];
-
     if (!line) return;
 
-    // Update or add pomo count
     const pomoRegex = /\[pomo::\s*(\d+)\/(\d+)\]/;
     const match = line.match(pomoRegex);
     const completed = (task.completedPomodoros || 0) + 1;
 
     if (match) {
-      const estimated = parseInt(match[2]);
-      lines[task.line] = line.replace(pomoRegex, `[pomo:: ${completed}/${estimated}]`);
+      lines[task.line] = line.replace(pomoRegex, `[pomo:: ${completed}/${parseInt(match[2])}`);
     } else {
       lines[task.line] = line.trimEnd() + ` [pomo:: ${completed}/4]`;
     }
