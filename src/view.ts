@@ -278,16 +278,6 @@ export class PomodoroView extends ItemView {
       ['idle', 'work', 'short-break', 'long-break', 'paused'].forEach(s => this.container.removeClass(`pomodoro-state-${s}`));
       this.container.addClass(`pomodoro-state-${status.state}`);
 
-      // Kill ring transition for this frame so it doesn't animate the jump
-      if (this.ringCircle) {
-        this.ringCircle.style.transition = 'none';
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (this.ringCircle) this.ringCircle.style.transition = '';
-          });
-        });
-      }
-
       if (this.lastRenderedState) {
         this.container.addClass('pomodoro-phase-transition');
         setTimeout(() => this.container.removeClass('pomodoro-phase-transition'), 600);
@@ -297,13 +287,10 @@ export class PomodoroView extends ItemView {
     }
 
     if (this.ringCircle) {
-      if (status.state === 'idle') {
-        const fillRatio = (status.timeRemaining / 60) / 90;
-        this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - fillRatio)));
-      } else {
-        const fillRatio = status.totalTime > 0 ? status.timeRemaining / status.totalTime : 0;
-        this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - fillRatio)));
-      }
+      // Always use 90-min scale so the ring never jumps between states
+      const remainingMinutes = status.timeRemaining / 60;
+      const fillRatio = remainingMinutes / 90;
+      this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - fillRatio)));
     }
 
     if (this.primaryBtn) {
