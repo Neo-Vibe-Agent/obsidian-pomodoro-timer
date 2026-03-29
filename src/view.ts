@@ -275,10 +275,11 @@ export class PomodoroView extends ItemView {
 
     if (this.ringCircle) {
       // Ring shows remaining time on a fixed 90-min scale (same as idle preview)
-      // This means the ring position doesn't jump when you press Start
+      // pct = how much of the ring should be FILLED (0 = empty, 1 = full)
+      // offset = how much to HIDE (0 = full ring, circumference = empty ring)
       const remainingMinutes = status.timeRemaining / 60;
-      const pct = remainingMinutes / 90;
-      const offset = this.ringCircumference * (1 - pct);
+      const fillRatio = remainingMinutes / 90;
+      const offset = this.ringCircumference * (1 - fillRatio);
       this.ringCircle.setAttribute('stroke-dashoffset', String(offset));
     }
 

@@ -102,6 +102,10 @@ export class PomodoroTimer {
   skip(): void {
     this.stopInterval();
     this.handlePhaseComplete();
+    // Always start the next phase when skipping (user intent is clear)
+    if (!this.interval) {
+      this.startInterval();
+    }
   }
 
   extend(minutes: number): void {

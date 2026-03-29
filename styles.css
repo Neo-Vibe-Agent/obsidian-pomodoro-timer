@@ -208,6 +208,11 @@ settings:
   transition: none;
 }
 
+/* Instant transition on phase change (no sweep animation) */
+.pomodoro-phase-transition .pomodoro-ring-progress {
+  transition: stroke-dashoffset 0s, stroke 0.3s ease !important;
+}
+
 .pomodoro-size-small .pomodoro-ring-bg { stroke-width: 3px; }
 .pomodoro-size-small .pomodoro-ring-progress { stroke-width: 5px; }
 .pomodoro-size-large .pomodoro-ring-bg { stroke-width: 5px; }
@@ -748,7 +753,8 @@ settings:
 }
 
 .pomodoro-theme-angel .pomodoro-timer-display {
-  color: #ffffff;
+  color: #8a7540;
+  font-weight: 800;
 }
 
 .pomodoro-theme-angel .pomodoro-ring-progress {
