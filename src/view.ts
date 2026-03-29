@@ -273,14 +273,34 @@ export class PomodoroView extends ItemView {
       this.stateLabel.setText(labels[status.state] || 'FOCUS');
     }
 
+    // Apply state class BEFORE ring update so CSS transition rules are active
+    if (this.container && status.state !== this.lastRenderedState) {
+      ['idle', 'work', 'short-break', 'long-break', 'paused'].forEach(s => this.container.removeClass(`pomodoro-state-${s}`));
+      this.container.addClass(`pomodoro-state-${status.state}`);
+
+      // Kill ring transition for this frame so it doesn't animate the jump
+      if (this.ringCircle) {
+        this.ringCircle.style.transition = 'none';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (this.ringCircle) this.ringCircle.style.transition = '';
+          });
+        });
+      }
+
+      if (this.lastRenderedState) {
+        this.container.addClass('pomodoro-phase-transition');
+        setTimeout(() => this.container.removeClass('pomodoro-phase-transition'), 600);
+      }
+      this.renderModeTabs(status.state === 'short-break' || status.state === 'long-break' ? status.state : 'work');
+      if (this.presetBtns) this.presetBtns.toggleClass('hidden', status.state !== 'idle');
+    }
+
     if (this.ringCircle) {
       if (status.state === 'idle') {
-        // Idle: show on 90-min scale (for scroll preview feel)
         const fillRatio = (status.timeRemaining / 60) / 90;
         this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - fillRatio)));
       } else {
-        // Running/paused: remaining / total so ring depletes visibly
-        // Starts full, ends empty
         const fillRatio = status.totalTime > 0 ? status.timeRemaining / status.totalTime : 0;
         this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - fillRatio)));
       }
@@ -290,17 +310,6 @@ export class PomodoroView extends ItemView {
       const btnText: Record<string, string> = { 'idle': 'Start', 'work': 'Pause', 'short-break': 'Pause', 'long-break': 'Pause', 'paused': 'Resume' };
       this.primaryBtn.setText(btnText[status.state] || 'Start');
       this.primaryBtn.className = `pomodoro-primary-btn pomodoro-primary-${status.state}`;
-    }
-
-    if (this.container && status.state !== this.lastRenderedState) {
-      ['idle', 'work', 'short-break', 'long-break', 'paused'].forEach(s => this.container.removeClass(`pomodoro-state-${s}`));
-      this.container.addClass(`pomodoro-state-${status.state}`);
-      if (this.lastRenderedState) {
-        this.container.addClass('pomodoro-phase-transition');
-        setTimeout(() => this.container.removeClass('pomodoro-phase-transition'), 600);
-      }
-      this.renderModeTabs(status.state === 'short-break' || status.state === 'long-break' ? status.state : 'work');
-      if (this.presetBtns) this.presetBtns.toggleClass('hidden', status.state !== 'idle');
     }
 
     if (this.cycleDots) this.renderCycleDots(status.completedPomodoros);

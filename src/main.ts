@@ -110,10 +110,10 @@ export default class PomodoroPlugin extends Plugin {
       new Notice(`Done: ${taskName}`);
       this.activeTask = null;
       this.timer.setTask(null);
-      this.updateView(this.timer.getStatus());
     } else {
-      new Notice('No active task');
+      new Notice('Session complete');
     }
+    this.updateView(this.timer.getStatus());
   }
 
   setActiveTask(task: TaskItem): void {
