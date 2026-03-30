@@ -1,6 +1,6 @@
 # Pomodoro Timer
 
-A beautiful, themeable Pomodoro timer for Obsidian with a circular progress ring, 10 themes, 12 sounds, and a floating popout window.
+A beautiful, customizable Pomodoro timer for Obsidian with a circular progress ring, 10 themes, 12 sounds, task tracking, and a floating popout window.
 
 No files created in your vault. No network calls. Inherits your Obsidian theme by default.
 
@@ -32,7 +32,7 @@ No files created in your vault. No network calls. Inherits your Obsidian theme b
 
 ### From Community Plugins
 1. Open **Settings > Community Plugins**
-2. Search for **"Pomodoro Timer"**
+2. Search for **"All-In-One Pomodoro"**
 3. Click **Install**, then **Enable**
 
 ### Manual
@@ -94,7 +94,7 @@ Planned for future releases:
 
 If this plugin helps you focus, consider supporting development:
 
-- [Buy Me a Coffee](https://buymeacoffee.com/neovibe)
+- [Buy Me a Coffee](https://buymeacoffee.com/neo.vibe)
 - [GitHub Sponsors](https://github.com/sponsors/Neo-Vibe-Agent)
 
 ## License

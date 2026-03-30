@@ -102,7 +102,7 @@ export class TaskSync {
     const completed = (task.completedPomodoros || 0) + 1;
 
     if (match) {
-      lines[task.line] = line.replace(pomoRegex, `[pomo:: ${completed}/${parseInt(match[2])}`);
+      lines[task.line] = line.replace(pomoRegex, `[pomo:: ${completed}/${parseInt(match[2])}]`);
     } else {
       lines[task.line] = line.trimEnd() + ` [pomo:: ${completed}/4]`;
     }

@@ -3,10 +3,10 @@
   "name": "All-In-One Pomodoro",
   "version": "1.1.0",
   "minAppVersion": "1.5.0",
-  "description": "A beautiful, themeable Pomodoro timer with task sync, calendar integration, and CLI companion.",
+  "description": "A beautiful, customizable Pomodoro timer with circular progress ring, 10 themes, 12 sounds, task tracking, and floating popout window.",
   "author": "Neo Vibe",
   "fundingUrl": {
-    "Buy Me a Coffee": "https://buymeacoffee.com/neovibe",
+    "Buy Me a Coffee": "https://buymeacoffee.com/neo.vibe",
     "GitHub Sponsor": "https://github.com/sponsors/Neo-Vibe-Agent"
   },
   "isDesktopOnly": false
