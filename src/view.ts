@@ -483,6 +483,24 @@ export class PomodoroView extends ItemView {
     }
   }
 
+  setSelectedMode(mode: 'work' | 'short-break' | 'long-break'): void {
+    this.selectedMode = mode;
+    // Update the display to match
+    let minutes = this.plugin.settings.workDuration;
+    if (mode === 'short-break') minutes = this.plugin.settings.shortBreakDuration;
+    if (mode === 'long-break') minutes = this.plugin.settings.longBreakDuration;
+    if (this.timerDisplay) this.timerDisplay.setText(formatTime(minutes * 60));
+    if (this.stateLabel) {
+      const labels: Record<string, string> = { 'work': 'FOCUS', 'short-break': 'SHORT BREAK', 'long-break': 'LONG BREAK' };
+      this.stateLabel.setText(labels[mode] || 'FOCUS');
+    }
+    this.renderModeTabs(mode);
+    if (this.ringCircle) {
+      const fillRatio = minutes / 90;
+      this.ringCircle.setAttribute('stroke-dashoffset', String(this.ringCircumference * (1 - fillRatio)));
+    }
+  }
+
   removeLocalTask(name: string): void {
     const idx = this.plugin.localTasks.indexOf(name);
     if (idx !== -1) {

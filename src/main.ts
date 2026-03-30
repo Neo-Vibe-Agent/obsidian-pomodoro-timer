@@ -90,14 +90,25 @@ export default class PomodoroPlugin extends Plugin {
   }
 
   stopTimer(): void {
-    // Return active task to the list (don't remove it)
+    // Remember what mode we were in before resetting
+    const prevState = this.timer.getStatus().state;
+    const prevMode = this.timer.getPreviousState();
+    const wasBreak = prevState === 'short-break' || prevState === 'long-break' ||
+                     prevMode === 'short-break' || prevMode === 'long-break';
+
     this.returnTaskToList();
     this.timer.stop();
     new Notice('Timer reset');
     this.updateStatusBar('Ready');
-    // Refresh views to show task back in list
+
+    // Tell views to stay on the break tab if we were in a break
     for (const leaf of this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE)) {
-      (leaf.view as PomodoroView).renderLocalTasks();
+      const view = leaf.view as PomodoroView;
+      if (wasBreak) {
+        const breakType = (prevState === 'long-break' || prevMode === 'long-break') ? 'long-break' : 'short-break';
+        view.setSelectedMode(breakType);
+      }
+      view.renderLocalTasks();
     }
   }
 
