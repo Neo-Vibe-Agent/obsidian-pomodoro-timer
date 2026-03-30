@@ -74,7 +74,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .setLimits(1, 90, 1)
         .setValue(this.plugin.settings.workDuration)
         .setDynamicTooltip()
-        .onChange((value) => { this.plugin.settings.workDuration = value; this.debouncedSave(); }));
+        .onChange(async (value) => { this.plugin.settings.workDuration = value; await this.plugin.saveSettings(); }));
 
     new Setting(containerEl)
       .setName('Short Break')
@@ -82,7 +82,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .setLimits(1, 30, 1)
         .setValue(this.plugin.settings.shortBreakDuration)
         .setDynamicTooltip()
-        .onChange((value) => { this.plugin.settings.shortBreakDuration = value; this.debouncedSave(); }));
+        .onChange(async (value) => { this.plugin.settings.shortBreakDuration = value; await this.plugin.saveSettings(); }));
 
     new Setting(containerEl)
       .setName('Long Break')
@@ -90,7 +90,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .setLimits(5, 60, 1)
         .setValue(this.plugin.settings.longBreakDuration)
         .setDynamicTooltip()
-        .onChange((value) => { this.plugin.settings.longBreakDuration = value; this.debouncedSave(); }));
+        .onChange(async (value) => { this.plugin.settings.longBreakDuration = value; await this.plugin.saveSettings(); }));
 
     new Setting(containerEl)
       .setName('Long Break Interval')
@@ -257,7 +257,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         this.plugin.settings.customSecondary,
         async (value) => { this.plugin.settings.customSecondary = value; await this.plugin.saveSettings(); });
 
-      this.addColorSetting(containerEl, 'Background', 'Timer panel background', '#22c55e',
+      this.addColorSetting(containerEl, 'Accent', 'Labels, stats, inactive tabs', '#22c55e',
         this.plugin.settings.customAccentColor,
         async (value) => { this.plugin.settings.customAccentColor = value; await this.plugin.saveSettings(); });
     }
@@ -272,40 +272,5 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.notifySystem)
         .onChange(async (value) => { this.plugin.settings.notifySystem = value; await this.plugin.saveSettings(); }));
 
-    // Hotkeys
-    containerEl.createEl('h2', { text: 'Hotkeys' });
-    containerEl.createEl('p', { text: 'Assign keyboard shortcuts in Settings > Hotkeys. Search for "Pomodoro".', cls: 'setting-item-description' });
-
-    const hotkeys = [
-      { command: 'Start Pomodoro', id: 'start-pomodoro' },
-      { command: 'Pause Pomodoro', id: 'pause-pomodoro' },
-      { command: 'Stop Pomodoro', id: 'stop-pomodoro' },
-      { command: 'Skip to Next Phase', id: 'skip-pomodoro' },
-      { command: 'Open Panel', id: 'open-pomodoro' },
-      { command: 'Hide Panel', id: 'hide-pomodoro' },
-      { command: 'Toggle Panel', id: 'toggle-pomodoro' },
-      { command: 'Pop Out Window', id: 'popout-pomodoro' },
-    ];
-
-    for (const hk of hotkeys) {
-      new Setting(containerEl)
-        .setName(hk.command)
-        .setDesc(`Command: all-in-one-pomodoro:${hk.id}`)
-        .addButton(btn => btn
-          .setButtonText('Set Hotkey')
-          .onClick(() => {
-            // Open Obsidian's hotkey settings filtered to our plugin
-            (this.app as any).setting?.open?.();
-            (this.app as any).setting?.openTabById?.('hotkeys');
-            // Try to filter
-            setTimeout(() => {
-              const searchEl = document.querySelector('.hotkey-settings-container input[type="text"]') as HTMLInputElement;
-              if (searchEl) {
-                searchEl.value = 'All-In-One Pomodoro';
-                searchEl.dispatchEvent(new Event('input'));
-              }
-            }, 300);
-          }));
-    }
   }
 }
