@@ -271,5 +271,41 @@ export class PomodoroSettingTab extends PluginSettingTab {
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.notifySystem)
         .onChange(async (value) => { this.plugin.settings.notifySystem = value; await this.plugin.saveSettings(); }));
+
+    // Hotkeys
+    containerEl.createEl('h2', { text: 'Hotkeys' });
+    containerEl.createEl('p', { text: 'Assign keyboard shortcuts in Settings > Hotkeys. Search for "Pomodoro".', cls: 'setting-item-description' });
+
+    const hotkeys = [
+      { command: 'Start Pomodoro', id: 'start-pomodoro' },
+      { command: 'Pause Pomodoro', id: 'pause-pomodoro' },
+      { command: 'Stop Pomodoro', id: 'stop-pomodoro' },
+      { command: 'Skip to Next Phase', id: 'skip-pomodoro' },
+      { command: 'Open Panel', id: 'open-pomodoro' },
+      { command: 'Hide Panel', id: 'hide-pomodoro' },
+      { command: 'Toggle Panel', id: 'toggle-pomodoro' },
+      { command: 'Pop Out Window', id: 'popout-pomodoro' },
+    ];
+
+    for (const hk of hotkeys) {
+      new Setting(containerEl)
+        .setName(hk.command)
+        .setDesc(`Command: all-in-one-pomodoro:${hk.id}`)
+        .addButton(btn => btn
+          .setButtonText('Set Hotkey')
+          .onClick(() => {
+            // Open Obsidian's hotkey settings filtered to our plugin
+            (this.app as any).setting?.open?.();
+            (this.app as any).setting?.openTabById?.('hotkeys');
+            // Try to filter
+            setTimeout(() => {
+              const searchEl = document.querySelector('.hotkey-settings-container input[type="text"]') as HTMLInputElement;
+              if (searchEl) {
+                searchEl.value = 'All-In-One Pomodoro';
+                searchEl.dispatchEvent(new Event('input'));
+              }
+            }, 300);
+          }));
+    }
   }
 }

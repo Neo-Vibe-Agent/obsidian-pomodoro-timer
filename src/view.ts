@@ -251,7 +251,6 @@ export class PomodoroView extends ItemView {
     });
 
     const addTaskToList = () => {
-      if (this.plugin.timer.isRunning()) return; // locked while timer is running
       const name = taskInput.value.trim();
       if (!name) return;
       this.plugin.localTasks.push(name);

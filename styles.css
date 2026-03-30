@@ -562,11 +562,7 @@ settings:
   opacity: 0.5;
 }
 
-/* Input stays typeable while locked, only + button is disabled */
-.pomodoro-task-input-wrapper.locked .pomodoro-task-add-btn {
-  opacity: 0.4;
-  pointer-events: none;
-}
+/* Task selection locked while running, but input and add always work */
 
 .pomodoro-task-remove {
   display: flex;
@@ -909,8 +905,21 @@ settings:
 
 .pomodoro-theme-angel .pomodoro-task-input {
   color: #2a2520;
-  background: #efe8d8;
+  background: #f5f0e4;
   border-color: #c4b890;
+}
+
+.pomodoro-theme-angel .pomodoro-task-input::placeholder {
+  color: #a09078;
+}
+
+.pomodoro-theme-angel .pomodoro-task-add-btn {
+  color: #8a7e68;
+  border-color: #c4b890;
+}
+
+.pomodoro-theme-angel .pomodoro-task-item:hover {
+  background: #efe8d8;
 }
 
 .pomodoro-theme-angel .pomodoro-active-task.has-task {
