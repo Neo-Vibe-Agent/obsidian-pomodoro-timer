@@ -20,6 +20,8 @@ No files created in your vault. No network calls. Inherits your Obsidian theme b
 
 ## Screenshots
 
+![Default theme - sidebar with tasks](screenshots/default-sidebar.png)
+
 ![Citrus theme - sidebar with graph view](screenshots/citrus-sidebar.png)
 
 ![Neon theme - floating popout window](screenshots/neon-popout.png)
