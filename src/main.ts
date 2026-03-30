@@ -13,6 +13,7 @@ export default class PomodoroPlugin extends Plugin {
   taskSync: TaskSync;
   private statusBarItem: HTMLElement | null = null;
   private activeTask: TaskItem | null = null;
+  localTasks: string[] = [];
 
   async onload(): Promise<void> {
     await this.loadSettings();

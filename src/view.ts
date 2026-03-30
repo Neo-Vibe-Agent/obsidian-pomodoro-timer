@@ -31,7 +31,6 @@ export class PomodoroView extends ItemView {
   private lastRenderedState: string = '';
   private activePreset: number;
   private selectedMode: 'work' | 'short-break' | 'long-break' = 'work';
-  private localTasks: string[] = [];
   private taskInputWrapper: HTMLElement;
   private _onMouseMove: ((e: MouseEvent) => void) | null = null;
   private _onMouseUp: (() => void) | null = null;
@@ -247,7 +246,7 @@ export class PomodoroView extends ItemView {
       if (this.plugin.timer.isRunning()) return; // locked while timer is running
       const name = taskInput.value.trim();
       if (!name) return;
-      this.localTasks.push(name);
+      this.plugin.localTasks.push(name);
       taskInput.value = '';
       this.renderLocalTasks();
     };
@@ -463,9 +462,9 @@ export class PomodoroView extends ItemView {
   }
 
   removeLocalTask(name: string): void {
-    const idx = this.localTasks.indexOf(name);
+    const idx = this.plugin.localTasks.indexOf(name);
     if (idx !== -1) {
-      this.localTasks.splice(idx, 1);
+      this.plugin.localTasks.splice(idx, 1);
       this.renderLocalTasks();
     }
   }
@@ -477,8 +476,8 @@ export class PomodoroView extends ItemView {
     const isLocked = this.plugin.timer.isRunning();
 
     // Show local tasks first
-    for (let i = 0; i < this.localTasks.length; i++) {
-      const name = this.localTasks[i];
+    for (let i = 0; i < this.plugin.localTasks.length; i++) {
+      const name = this.plugin.localTasks[i];
       const taskEl = this.taskList.createDiv({ cls: `pomodoro-task-item ${isLocked ? 'locked' : ''}` });
       taskEl.createSpan({ cls: 'pomodoro-task-text', text: name });
 
@@ -488,7 +487,7 @@ export class PomodoroView extends ItemView {
         removeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
         removeBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          this.localTasks.splice(i, 1);
+          this.plugin.localTasks.splice(i, 1);
           this.renderLocalTasks();
         });
       }
@@ -512,7 +511,7 @@ export class PomodoroView extends ItemView {
       if (activeTask === name) taskEl.addClass('active');
     }
 
-    if (this.localTasks.length === 0) {
+    if (this.plugin.localTasks.length === 0) {
       this.taskList.createDiv({ cls: 'pomodoro-no-tasks', text: 'No tasks yet' });
     }
   }
@@ -530,7 +529,7 @@ export class PomodoroView extends ItemView {
     if (tasks.length === 0) return;
 
     // Add a separator if we have local tasks
-    if (this.localTasks.length > 0 && tasks.length > 0) {
+    if (this.plugin.localTasks.length > 0 && tasks.length > 0) {
       this.taskList.createDiv({ cls: 'pomodoro-task-separator' });
     }
 
