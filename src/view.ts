@@ -449,7 +449,15 @@ export class PomodoroView extends ItemView {
     }
   }
 
-  private renderLocalTasks(): void {
+  removeLocalTask(name: string): void {
+    const idx = this.localTasks.indexOf(name);
+    if (idx !== -1) {
+      this.localTasks.splice(idx, 1);
+      this.renderLocalTasks();
+    }
+  }
+
+  renderLocalTasks(): void {
     if (!this.taskList) return;
     this.taskList.empty();
 

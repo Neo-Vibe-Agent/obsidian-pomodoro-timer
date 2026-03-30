@@ -89,9 +89,15 @@ export default class PomodoroPlugin extends Plugin {
   }
 
   stopTimer(): void {
+    // Return active task to the list (don't remove it)
+    this.returnTaskToList();
     this.timer.stop();
     new Notice('Timer reset');
     this.updateStatusBar('Ready');
+    // Refresh views to show task back in list
+    for (const leaf of this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE)) {
+      (leaf.view as PomodoroView).renderLocalTasks();
+    }
   }
 
   skipTimer(): void {
@@ -108,15 +114,27 @@ export default class PomodoroPlugin extends Plugin {
     const taskName = this.activeTask?.text || this.timer.getStatus().activeTask;
     if (taskName) {
       new Notice(`Done: ${taskName}`);
+      // Remove from local task list in views
+      for (const leaf of this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE)) {
+        (leaf.view as PomodoroView).removeLocalTask(taskName);
+      }
       this.activeTask = null;
       this.timer.setTask(null);
     } else {
       new Notice('Session complete');
     }
-    // Reset to idle focus, don't go to break
     this.timer.stop();
     this.updateStatusBar('Ready');
     this.updateView(this.timer.getStatus());
+  }
+
+  returnTaskToList(): void {
+    const taskName = this.activeTask?.text || this.timer.getStatus().activeTask;
+    if (taskName) {
+      // Task goes back to the list, not removed
+      this.activeTask = null;
+      this.timer.setTask(null);
+    }
   }
 
   setActiveTask(task: TaskItem): void {
