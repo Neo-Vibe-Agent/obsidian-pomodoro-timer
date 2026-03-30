@@ -13,8 +13,8 @@ export function getProgressPercentage(remaining: number, total: number): number 
 export function getStateLabel(state: string): string {
   switch (state) {
     case 'work': return 'Focus';
-    case 'short-break': return 'Short Break';
-    case 'long-break': return 'Long Break';
+    case 'short-break': return 'Short break';
+    case 'long-break': return 'Long break';
     case 'paused': return 'Paused';
     default: return 'Ready';
   }

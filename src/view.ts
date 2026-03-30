@@ -147,7 +147,7 @@ export class PomodoroView extends ItemView {
     // Timer display inside ring
     const ringContent = this.ringWrapper.createDiv({ cls: 'pomodoro-ring-content' });
     this.timerDisplay = ringContent.createDiv({ cls: 'pomodoro-timer-display', text: formatTime(this.plugin.settings.workDuration * 60) });
-    this.stateLabel = ringContent.createDiv({ cls: 'pomodoro-ring-state', text: 'FOCUS' });
+    this.stateLabel = ringContent.createDiv({ cls: 'pomodoro-ring-state', text: 'Focus' });
 
     // Set initial ring fill
     const initPct = (this.plugin.settings.workDuration / 90) * 100;
@@ -296,8 +296,8 @@ export class PomodoroView extends ItemView {
     if (this.timerDisplay) this.timerDisplay.setText(formatTime(Math.floor(status.timeRemaining)));
 
     if (this.stateLabel) {
-      const labels: Record<string, string> = { 'idle': 'FOCUS', 'work': 'FOCUS', 'short-break': 'SHORT BREAK', 'long-break': 'LONG BREAK', 'paused': 'PAUSED' };
-      this.stateLabel.setText(labels[status.state] || 'FOCUS');
+      const labels: Record<string, string> = { 'idle': 'Focus', 'work': 'Focus', 'short-break': 'Short break', 'long-break': 'Long break', 'paused': 'Paused' };
+      this.stateLabel.setText(labels[status.state] || 'Focus');
     }
 
     // Apply state class BEFORE ring update so CSS transition rules are active
@@ -390,8 +390,8 @@ export class PomodoroView extends ItemView {
         if (mode.id === 'long-break') minutes = this.plugin.settings.longBreakDuration;
         this.timerDisplay.setText(formatTime(minutes * 60));
         if (this.stateLabel) {
-          const labels: Record<string, string> = { 'work': 'FOCUS', 'short-break': 'SHORT BREAK', 'long-break': 'LONG BREAK' };
-          this.stateLabel.setText(labels[mode.id] || 'FOCUS');
+          const labels: Record<string, string> = { 'work': 'Focus', 'short-break': 'Short break', 'long-break': 'Long break' };
+          this.stateLabel.setText(labels[mode.id] || 'Focus');
         }
         this.modeTabs.querySelectorAll('.pomodoro-mode-tab').forEach(t => t.removeClass('active'));
         tab.addClass('active');
@@ -509,8 +509,8 @@ export class PomodoroView extends ItemView {
     if (mode === 'long-break') minutes = this.plugin.settings.longBreakDuration;
     if (this.timerDisplay) this.timerDisplay.setText(formatTime(minutes * 60));
     if (this.stateLabel) {
-      const labels: Record<string, string> = { 'work': 'FOCUS', 'short-break': 'SHORT BREAK', 'long-break': 'LONG BREAK' };
-      this.stateLabel.setText(labels[mode] || 'FOCUS');
+      const labels: Record<string, string> = { 'work': 'Focus', 'short-break': 'Short break', 'long-break': 'Long break' };
+      this.stateLabel.setText(labels[mode] || 'Focus');
     }
     this.renderModeTabs(mode);
     if (this.ringCircle) {

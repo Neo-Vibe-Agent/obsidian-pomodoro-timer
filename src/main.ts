@@ -281,7 +281,7 @@ export default class PomodoroPlugin extends Plugin {
         container.style.removeProperty('--pomo-accent');
         container.style.removeProperty('--pomo-break');
       }
-      view.refreshTasks();
+      void view.refreshTasks();
     }
   }
 }
