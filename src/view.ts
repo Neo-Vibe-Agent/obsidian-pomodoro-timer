@@ -337,7 +337,13 @@ export class PomodoroView extends ItemView {
     for (const mode of modes) {
       const tab = this.modeTabs.createDiv({ cls: `pomodoro-mode-tab ${mode.id === activeMode ? 'active' : ''}`, text: mode.label });
       tab.addEventListener('click', () => {
-        if (this.plugin.timer.getStatus().state !== 'idle') return;
+        const running = this.plugin.timer.isRunning();
+        if (running) return; // can't switch while timer is actively counting
+        // Stop current timer if switching modes from a waiting break
+        const state = this.plugin.timer.getStatus().state;
+        if (state !== 'idle') {
+          this.plugin.timer.stop();
+        }
         this.selectedMode = mode.id as any;
         let minutes = this.plugin.settings.workDuration;
         if (mode.id === 'short-break') minutes = this.plugin.settings.shortBreakDuration;
