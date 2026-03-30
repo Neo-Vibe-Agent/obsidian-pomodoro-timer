@@ -677,7 +677,7 @@ settings:
   --pomo-break: #00f5d4;
   --pomo-bg: #0a0a1a;
   --pomo-text: #f0f0f0;
-  --pomo-muted: #555;
+  --pomo-muted: #8888bb;
   --pomo-border: #1a1a3a;
   --pomo-surface: #111128;
 }
@@ -770,7 +770,7 @@ settings:
   --pomo-break: #ff2d95;
   --pomo-bg: #0a0014;
   --pomo-text: #e0e0ff;
-  --pomo-muted: #5555aa;
+  --pomo-muted: #7777cc;
   --pomo-border: #1a0a30;
   --pomo-surface: #120a24;
 }
@@ -842,8 +842,22 @@ settings:
 }
 
 .pomodoro-theme-angel .pomodoro-secondary-btn {
-  border-color: #c4a862;
-  color: #6a5e48;
+  border-color: #a89050;
+  background: #e8dcc0;
+  color: #4a3e28;
+  font-weight: 600;
+}
+
+.pomodoro-theme-angel .pomodoro-secondary-btn:hover {
+  background: #d8c8a0;
+  color: #2a2018;
+}
+
+/* Angel: break state buttons */
+.pomodoro-theme-angel .pomodoro-state-short-break .pomodoro-primary-btn,
+.pomodoro-theme-angel .pomodoro-state-long-break .pomodoro-primary-btn {
+  background: #a89050;
+  color: #faf8f4;
 }
 
 /* Angel: task visibility fix */
