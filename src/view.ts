@@ -197,8 +197,10 @@ export class PomodoroView extends ItemView {
     this._onMouseUp = () => {
       if (isDragging) { isDragging = false; this.ringWrapper.removeClass('dragging'); }
     };
-    document.addEventListener('mousemove', this._onMouseMove);
-    document.addEventListener('mouseup', this._onMouseUp);
+    // Use the view's own document (works in both sidebar and popout window)
+    const doc = this.containerEl.doc;
+    doc.addEventListener('mousemove', this._onMouseMove);
+    doc.addEventListener('mouseup', this._onMouseUp);
 
     // ===== PRESETS =====
     this.presetBtns = timerSection.createDiv({ cls: 'pomodoro-presets' });
@@ -267,8 +269,9 @@ export class PomodoroView extends ItemView {
   }
 
   async onClose(): Promise<void> {
-    if (this._onMouseMove) document.removeEventListener('mousemove', this._onMouseMove);
-    if (this._onMouseUp) document.removeEventListener('mouseup', this._onMouseUp);
+    const doc = this.containerEl.doc;
+    if (this._onMouseMove) doc.removeEventListener('mousemove', this._onMouseMove);
+    if (this._onMouseUp) doc.removeEventListener('mouseup', this._onMouseUp);
     this._onMouseMove = null;
     this._onMouseUp = null;
   }
