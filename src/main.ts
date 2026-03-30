@@ -258,13 +258,15 @@ export default class PomodoroPlugin extends Plugin {
       const view = leaf.view as PomodoroView;
       const container = view.containerEl.children[1] as HTMLElement;
       container.className = container.className.replace(/pomodoro-theme-\S+/g, '').trim();
-      container.addClass(`pomodoro-theme-${this.settings.theme}`);
       container.className = container.className.replace(/pomodoro-size-\S+/g, '').trim();
       container.addClass(`pomodoro-size-${this.settings.timerSize}`);
       if (this.settings.useCustomColors) {
+        // No theme class, just custom colors on default base
+        container.addClass('pomodoro-theme-default');
         if (this.settings.customPrimary) container.style.setProperty('--pomo-accent', this.settings.customPrimary);
         if (this.settings.customSecondary) container.style.setProperty('--pomo-break', this.settings.customSecondary);
       } else {
+        container.addClass(`pomodoro-theme-${this.settings.theme}`);
         container.style.removeProperty('--pomo-accent');
         container.style.removeProperty('--pomo-break');
       }
