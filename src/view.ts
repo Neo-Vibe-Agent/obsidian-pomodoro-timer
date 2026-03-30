@@ -32,6 +32,7 @@ export class PomodoroView extends ItemView {
   private activePreset: number;
   private selectedMode: 'work' | 'short-break' | 'long-break' = 'work';
   private localTasks: string[] = [];
+  private taskInputWrapper: HTMLElement;
   private _onMouseMove: ((e: MouseEvent) => void) | null = null;
   private _onMouseUp: (() => void) | null = null;
 
@@ -233,13 +234,15 @@ export class PomodoroView extends ItemView {
     taskChevron.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
 
     // Task input
-    const taskInputWrapper = this.taskSection.createDiv({ cls: 'pomodoro-task-input-wrapper' });
+    this.taskInputWrapper = this.taskSection.createDiv({ cls: 'pomodoro-task-input-wrapper' });
+    const taskInputWrapper = this.taskInputWrapper;
     const taskInput = taskInputWrapper.createEl('input', {
       cls: 'pomodoro-task-input',
       attr: { type: 'text', placeholder: 'Add a task...' }
     });
 
     const addTaskToList = () => {
+      if (this.plugin.timer.isRunning()) return; // locked while timer is running
       const name = taskInput.value.trim();
       if (!name) return;
       this.localTasks.push(name);
@@ -320,8 +323,15 @@ export class PomodoroView extends ItemView {
       this.taskDisplay.toggleClass('has-task', !!status.activeTask);
     }
 
+    // Lock/unlock task input and list based on running state
+    const isRunning = this.plugin.timer.isRunning();
+    if (this.taskInputWrapper) {
+      this.taskInputWrapper.toggleClass('locked', isRunning);
+    }
+
     if (status.state !== this.lastRenderedState) {
       this.renderSecondaryControls(status.state);
+      this.renderLocalTasks(); // re-render to update locked state
       this.lastRenderedState = status.state;
     }
   }
@@ -461,31 +471,37 @@ export class PomodoroView extends ItemView {
     if (!this.taskList) return;
     this.taskList.empty();
 
+    const isLocked = this.plugin.timer.isRunning();
+
     // Show local tasks first
     for (let i = 0; i < this.localTasks.length; i++) {
       const name = this.localTasks[i];
-      const taskEl = this.taskList.createDiv({ cls: 'pomodoro-task-item' });
+      const taskEl = this.taskList.createDiv({ cls: `pomodoro-task-item ${isLocked ? 'locked' : ''}` });
       taskEl.createSpan({ cls: 'pomodoro-task-text', text: name });
 
-      // Remove button
-      const removeBtn = taskEl.createSpan({ cls: 'pomodoro-task-remove' });
-      removeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-      removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.localTasks.splice(i, 1);
-        this.renderLocalTasks();
-      });
+      // Remove button (hidden when locked)
+      if (!isLocked) {
+        const removeBtn = taskEl.createSpan({ cls: 'pomodoro-task-remove' });
+        removeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.localTasks.splice(i, 1);
+          this.renderLocalTasks();
+        });
+      }
 
-      // Click to activate
-      taskEl.addEventListener('click', () => {
-        this.plugin.setActiveTaskByName(name);
-        if (this.taskDisplay) {
-          this.taskDisplay.setText(name);
-          this.taskDisplay.toggleClass('has-task', true);
-        }
-        this.taskList.querySelectorAll('.pomodoro-task-item').forEach(el => el.removeClass('active'));
-        taskEl.addClass('active');
-      });
+      // Click to activate (disabled when locked)
+      if (!isLocked) {
+        taskEl.addEventListener('click', () => {
+          this.plugin.setActiveTaskByName(name);
+          if (this.taskDisplay) {
+            this.taskDisplay.setText(name);
+            this.taskDisplay.toggleClass('has-task', true);
+          }
+          this.taskList.querySelectorAll('.pomodoro-task-item').forEach(el => el.removeClass('active'));
+          taskEl.addClass('active');
+        });
+      }
 
       // Highlight if this is the active task
       const activeTask = this.plugin.timer.getStatus().activeTask;

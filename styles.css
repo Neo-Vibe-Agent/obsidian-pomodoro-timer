@@ -554,6 +554,21 @@ settings:
   margin-left: 8px;
 }
 
+.pomodoro-task-item.locked {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.pomodoro-task-input-wrapper.locked .pomodoro-task-input {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.pomodoro-task-input-wrapper.locked .pomodoro-task-add-btn {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 .pomodoro-task-remove {
   display: flex;
   align-items: center;
