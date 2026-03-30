@@ -249,15 +249,15 @@ export class PomodoroSettingTab extends PluginSettingTab {
         }));
 
     if (this.plugin.settings.useCustomColors) {
-      this.addColorSetting(containerEl, 'Primary', 'Focus ring and buttons', '#ef4444',
+      this.addColorSetting(containerEl, 'Focus Color', 'Ring, buttons, and active states during focus', '#ef4444',
         this.plugin.settings.customPrimary,
         async (value) => { this.plugin.settings.customPrimary = value; await this.plugin.saveSettings(); });
 
-      this.addColorSetting(containerEl, 'Secondary', 'Break state color', '#eab308',
+      this.addColorSetting(containerEl, 'Break Color', 'Ring and buttons during short and long breaks', '#eab308',
         this.plugin.settings.customSecondary,
         async (value) => { this.plugin.settings.customSecondary = value; await this.plugin.saveSettings(); });
 
-      this.addColorSetting(containerEl, 'Accent', 'Highlights and active states', '#22c55e',
+      this.addColorSetting(containerEl, 'Background', 'Timer panel background', '#22c55e',
         this.plugin.settings.customAccentColor,
         async (value) => { this.plugin.settings.customAccentColor = value; await this.plugin.saveSettings(); });
     }
