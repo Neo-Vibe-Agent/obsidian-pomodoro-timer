@@ -56,9 +56,9 @@ export class PomodoroView extends ItemView {
 
     // Apply theme or custom colors
     if (this.plugin.settings.useCustomColors) {
-      this.container.addClass('pomodoro-theme-default');
-      if (this.plugin.settings.customPrimary) c.style.setProperty('--pomo-accent', this.plugin.settings.customPrimary);
-      if (this.plugin.settings.customSecondary) c.style.setProperty('--pomo-break', this.plugin.settings.customSecondary);
+      this.container.addClass('pomodoro-custom-colors');
+      c.style.setProperty('--pomo-accent', this.plugin.settings.customPrimary || '#3b82f6');
+      c.style.setProperty('--pomo-break', this.plugin.settings.customSecondary || '#ef4444');
     } else {
       this.container.addClass(`pomodoro-theme-${this.plugin.settings.theme}`);
     }

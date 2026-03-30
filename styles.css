@@ -970,6 +970,39 @@ settings:
 }
 
 /* ============================================================ */
+/* CUSTOM COLOR MODE                                            */
+/* ============================================================ */
+
+/* When custom colors are on, use a neutral dark base like cyberpunk */
+.pomodoro-custom-colors {
+  --pomo-bg: #1a1a2e;
+  --pomo-text: #e8e8f0;
+  --pomo-muted: #8888aa;
+  --pomo-border: #2a2a40;
+  --pomo-surface: #22223a;
+}
+
+.pomodoro-custom-colors .pomodoro-timer-display {
+  text-shadow: 0 0 15px var(--pomo-accent), 0 0 35px rgba(255,255,255,0.1);
+}
+
+.pomodoro-custom-colors .pomodoro-ring-progress {
+  filter: drop-shadow(0 0 8px var(--pomo-ring-color));
+}
+
+.pomodoro-custom-colors .pomodoro-primary-btn {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--pomo-accent) 40%, transparent);
+}
+
+.pomodoro-custom-colors .pomodoro-ring-state {
+  color: var(--pomo-ring-color);
+}
+
+.pomodoro-custom-colors .pomodoro-cycle-dot.filled {
+  box-shadow: 0 0 6px var(--pomo-accent);
+}
+
+/* ============================================================ */
 /* BUTTON VARIANTS                                              */
 /* ============================================================ */
 

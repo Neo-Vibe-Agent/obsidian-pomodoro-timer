@@ -260,11 +260,12 @@ export default class PomodoroPlugin extends Plugin {
       container.className = container.className.replace(/pomodoro-theme-\S+/g, '').trim();
       container.className = container.className.replace(/pomodoro-size-\S+/g, '').trim();
       container.addClass(`pomodoro-size-${this.settings.timerSize}`);
+      // Also remove custom-colors class before re-applying
+      container.removeClass('pomodoro-custom-colors');
       if (this.settings.useCustomColors) {
-        // No theme class, just custom colors on default base
-        container.addClass('pomodoro-theme-default');
-        if (this.settings.customPrimary) container.style.setProperty('--pomo-accent', this.settings.customPrimary);
-        if (this.settings.customSecondary) container.style.setProperty('--pomo-break', this.settings.customSecondary);
+        container.addClass('pomodoro-custom-colors');
+        container.style.setProperty('--pomo-accent', this.settings.customPrimary || '#3b82f6');
+        container.style.setProperty('--pomo-break', this.settings.customSecondary || '#ef4444');
       } else {
         container.addClass(`pomodoro-theme-${this.settings.theme}`);
         container.style.removeProperty('--pomo-accent');
