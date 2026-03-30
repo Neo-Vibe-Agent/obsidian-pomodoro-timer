@@ -521,16 +521,14 @@ export class PomodoroView extends ItemView {
       const taskEl = this.taskList.createDiv({ cls: `pomodoro-task-item ${isLocked ? 'locked' : ''}` });
       taskEl.createSpan({ cls: 'pomodoro-task-text', text: name });
 
-      // Remove button (hidden when locked)
-      if (!isLocked) {
-        const removeBtn = taskEl.createSpan({ cls: 'pomodoro-task-remove' });
-        removeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-        removeBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.plugin.localTasks.splice(i, 1);
-          this.renderLocalTasks();
-        });
-      }
+      // Remove button (always available)
+      const removeBtn = taskEl.createSpan({ cls: 'pomodoro-task-remove' });
+      removeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.plugin.localTasks.splice(i, 1);
+        this.renderLocalTasks();
+      });
 
       // Click to activate (always has listener, but checks running state)
       taskEl.addEventListener('click', () => {
