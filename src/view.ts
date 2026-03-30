@@ -49,11 +49,19 @@ export class PomodoroView extends ItemView {
     this.container = this.containerEl.children[1];
     this.container.empty();
     this.container.addClass('pomodoro-container');
-    this.container.addClass(`pomodoro-theme-${this.plugin.settings.theme}`);
     this.container.addClass(`pomodoro-size-${this.plugin.settings.timerSize}`);
     this.container.addClass('pomodoro-state-idle');
 
     const c = this.container as HTMLElement;
+
+    // Apply theme or custom colors
+    if (this.plugin.settings.useCustomColors) {
+      this.container.addClass('pomodoro-theme-default');
+      if (this.plugin.settings.customPrimary) c.style.setProperty('--pomo-accent', this.plugin.settings.customPrimary);
+      if (this.plugin.settings.customSecondary) c.style.setProperty('--pomo-break', this.plugin.settings.customSecondary);
+    } else {
+      this.container.addClass(`pomodoro-theme-${this.plugin.settings.theme}`);
+    }
 
     // ===== HEADER =====
     const header = c.createDiv({ cls: 'pomodoro-header' });
