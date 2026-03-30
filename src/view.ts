@@ -455,8 +455,8 @@ export class PomodoroView extends ItemView {
       createBtn('Skip to Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
       createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     } else {
+      createBtn(`+${ext}m`, 'pomodoro-btn-extend', () => this.plugin.extendTimer(ext));
       createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
-      createBtn('Skip Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
       createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     }
   }
