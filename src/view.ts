@@ -152,10 +152,22 @@ export class PomodoroView extends ItemView {
       if (clickBlocked) return;
       const running = this.plugin.timer.isRunning();
       const state = this.plugin.timer.getStatus().state;
-      if (state === 'idle') this.plugin.startTimer(this.selectedMode);
-      else if (state === 'paused') this.plugin.resumeTimer();
-      else if (!running) this.plugin.timer.beginPhase();  // break waiting to start
-      else this.plugin.pauseTimer();
+      if (state === 'idle') {
+        this.plugin.startTimer(this.selectedMode);
+      } else if (state === 'paused') {
+        this.plugin.resumeTimer();
+      } else if (!running) {
+        // Not running, not idle, not paused = waiting break/phase
+        // If user selected Focus Time tab, start fresh focus instead of the waiting break
+        if (this.selectedMode === 'work') {
+          this.plugin.stopTimer();
+          this.plugin.startTimer('work');
+        } else {
+          this.plugin.timer.beginPhase();
+        }
+      } else {
+        this.plugin.pauseTimer();
+      }
     });
 
     // Scroll to adjust time when idle
@@ -210,10 +222,20 @@ export class PomodoroView extends ItemView {
     this.primaryBtn.addEventListener('click', () => {
       const state = this.plugin.timer.getStatus().state;
       const running = this.plugin.timer.isRunning();
-      if (state === 'idle') this.plugin.startTimer(this.selectedMode);
-      else if (state === 'paused') this.plugin.resumeTimer();
-      else if (!running) this.plugin.timer.beginPhase();
-      else this.plugin.pauseTimer();
+      if (state === 'idle') {
+        this.plugin.startTimer(this.selectedMode);
+      } else if (state === 'paused') {
+        this.plugin.resumeTimer();
+      } else if (!running) {
+        if (this.selectedMode === 'work') {
+          this.plugin.stopTimer();
+          this.plugin.startTimer('work');
+        } else {
+          this.plugin.timer.beginPhase();
+        }
+      } else {
+        this.plugin.pauseTimer();
+      }
     });
 
     // ===== SECONDARY CONTROLS =====
