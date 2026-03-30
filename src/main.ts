@@ -261,12 +261,15 @@ export default class PomodoroPlugin extends Plugin {
       container.addClass(`pomodoro-theme-${this.settings.theme}`);
       container.className = container.className.replace(/pomodoro-size-\S+/g, '').trim();
       container.addClass(`pomodoro-size-${this.settings.timerSize}`);
-      if (this.settings.customPrimary) container.style.setProperty('--pomo-accent', this.settings.customPrimary);
-      else container.style.removeProperty('--pomo-accent');
-      if (this.settings.customSecondary) container.style.setProperty('--pomo-break', this.settings.customSecondary);
-      else container.style.removeProperty('--pomo-break');
-      if (this.settings.customAccentColor) container.style.setProperty('--pomo-ring-color', this.settings.customAccentColor);
-      else container.style.removeProperty('--pomo-ring-color');
+      if (this.settings.useCustomColors) {
+        if (this.settings.customPrimary) container.style.setProperty('--pomo-accent', this.settings.customPrimary);
+        if (this.settings.customSecondary) container.style.setProperty('--pomo-break', this.settings.customSecondary);
+        if (this.settings.customAccentColor) container.style.setProperty('--pomo-ring-color', this.settings.customAccentColor);
+      } else {
+        container.style.removeProperty('--pomo-accent');
+        container.style.removeProperty('--pomo-break');
+        container.style.removeProperty('--pomo-ring-color');
+      }
       view.refreshTasks();
     }
   }

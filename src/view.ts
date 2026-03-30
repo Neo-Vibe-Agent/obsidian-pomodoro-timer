@@ -414,10 +414,18 @@ export class PomodoroView extends ItemView {
   }
 
   private adjustIdleTime(delta: number): void {
-    const current = this.plugin.settings.workDuration;
+    // Read/write the correct duration based on selected mode
+    let current: number;
+    if (this.selectedMode === 'short-break') current = this.plugin.settings.shortBreakDuration;
+    else if (this.selectedMode === 'long-break') current = this.plugin.settings.longBreakDuration;
+    else current = this.plugin.settings.workDuration;
+
     const next = Math.max(1, Math.min(90, current + delta));
     if (next !== current) {
-      this.plugin.settings.workDuration = next;
+      if (this.selectedMode === 'short-break') this.plugin.settings.shortBreakDuration = next;
+      else if (this.selectedMode === 'long-break') this.plugin.settings.longBreakDuration = next;
+      else this.plugin.settings.workDuration = next;
+
       this.plugin.saveSettings();
       this.timerDisplay.setText(formatTime(next * 60));
       this.activePreset = next;

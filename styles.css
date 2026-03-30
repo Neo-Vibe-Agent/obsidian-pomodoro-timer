@@ -562,11 +562,7 @@ settings:
   opacity: 0.5;
 }
 
-.pomodoro-task-input-wrapper.locked .pomodoro-task-input {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
+/* Input stays typeable while locked, only + button is disabled */
 .pomodoro-task-input-wrapper.locked .pomodoro-task-add-btn {
   opacity: 0.4;
   pointer-events: none;

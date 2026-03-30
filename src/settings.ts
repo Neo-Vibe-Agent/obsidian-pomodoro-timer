@@ -57,7 +57,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', { text: 'Timer' });
 
     new Setting(containerEl)
-      .setName('Timer name')
+      .setName('Timer Name')
       .setDesc('Custom name shown in header and status bar')
       .addText(text => text
         .setPlaceholder('Pomodoro')
@@ -68,7 +68,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         }));
 
     new Setting(containerEl)
-      .setName('Work duration')
+      .setName('Work Duration')
       .setDesc('Minutes per focus session')
       .addSlider(slider => slider
         .setLimits(1, 90, 1)
@@ -77,7 +77,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .onChange((value) => { this.plugin.settings.workDuration = value; this.debouncedSave(); }));
 
     new Setting(containerEl)
-      .setName('Short break')
+      .setName('Short Break')
       .addSlider(slider => slider
         .setLimits(1, 30, 1)
         .setValue(this.plugin.settings.shortBreakDuration)
@@ -85,7 +85,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .onChange((value) => { this.plugin.settings.shortBreakDuration = value; this.debouncedSave(); }));
 
     new Setting(containerEl)
-      .setName('Long break')
+      .setName('Long Break')
       .addSlider(slider => slider
         .setLimits(5, 60, 1)
         .setValue(this.plugin.settings.longBreakDuration)
@@ -93,7 +93,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .onChange((value) => { this.plugin.settings.longBreakDuration = value; this.debouncedSave(); }));
 
     new Setting(containerEl)
-      .setName('Long break interval')
+      .setName('Long Break Interval')
       .setDesc('Focus sessions before a long break')
       .addSlider(slider => slider
         .setLimits(2, 8, 1)
@@ -102,7 +102,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .onChange((value) => { this.plugin.settings.longBreakInterval = value; this.debouncedSave(); }));
 
     new Setting(containerEl)
-      .setName('Extend time')
+      .setName('Extend Time')
       .setDesc('Minutes added by the + button')
       .addSlider(slider => slider
         .setLimits(1, 30, 1)
@@ -111,13 +111,13 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .onChange((value) => { this.plugin.settings.extendMinutes = value; this.debouncedSave(); }));
 
     new Setting(containerEl)
-      .setName('Auto-start breaks')
+      .setName('Auto-Start Breaks')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.autoStartBreaks)
         .onChange(async (value) => { this.plugin.settings.autoStartBreaks = value; await this.plugin.saveSettings(); }));
 
     new Setting(containerEl)
-      .setName('Auto-start work')
+      .setName('Auto-Start Work')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.autoStartWork)
         .onChange(async (value) => { this.plugin.settings.autoStartWork = value; await this.plugin.saveSettings(); }));
@@ -126,7 +126,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', { text: 'Sound' });
 
     new Setting(containerEl)
-      .setName('Sound enabled')
+      .setName('Sound Enabled')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.soundEnabled)
         .onChange(async (value) => { this.plugin.settings.soundEnabled = value; await this.plugin.saveSettings(); }));
@@ -160,7 +160,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', { text: 'Tasks' });
 
     new Setting(containerEl)
-      .setName('Task sync')
+      .setName('Task Sync')
       .setDesc('Show tasks from your active file')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.taskSyncEnabled)
@@ -168,7 +168,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
 
     if (this.plugin.settings.taskSyncEnabled) {
       new Setting(containerEl)
-        .setName('Task source')
+        .setName('Task Source')
         .addDropdown(dropdown => dropdown
           .addOption('obsidian-tasks', 'Active file tasks')
           .addOption('custom-path', 'Custom file path')
@@ -177,7 +177,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
 
       if (this.plugin.settings.taskSource === 'custom-path') {
         new Setting(containerEl)
-          .setName('Task file path')
+          .setName('Task File Path')
           .addText(text => text
             .setPlaceholder('tasks.md')
             .setValue(this.plugin.settings.customTaskPath)
@@ -185,7 +185,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
       }
 
       new Setting(containerEl)
-        .setName('Log completed pomodoros')
+        .setName('Log Completed Pomodoros')
         .setDesc('Write session log to a markdown file')
         .addToggle(toggle => toggle
           .setValue(this.plugin.settings.logCompletedPomodoros)
@@ -212,7 +212,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .onChange(async (value: any) => { this.plugin.settings.theme = value; await this.plugin.saveSettings(); }));
 
     new Setting(containerEl)
-      .setName('Timer size')
+      .setName('Timer Size')
       .addDropdown(dropdown => dropdown
         .addOption('small', 'Small')
         .addOption('medium', 'Medium')
@@ -221,7 +221,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .onChange(async (value: any) => { this.plugin.settings.timerSize = value; await this.plugin.saveSettings(); }));
 
     new Setting(containerEl)
-      .setName('Scroll sensitivity')
+      .setName('Scroll Sensitivity')
       .setDesc('How fast scroll/drag adjusts time (1=slow, 5=fast)')
       .addSlider(slider => slider
         .setLimits(1, 5, 1)
@@ -231,25 +231,37 @@ export class PomodoroSettingTab extends PluginSettingTab {
 
     // Custom Colors
     containerEl.createEl('h2', { text: 'Custom Colors' });
-    containerEl.createEl('p', { text: 'Override theme colors. Leave empty to use theme defaults.', cls: 'setting-item-description' });
 
-    this.addColorSetting(containerEl, 'Primary', 'Focus ring and buttons', '#2dd4a8',
-      this.plugin.settings.customPrimary,
-      async (value) => { this.plugin.settings.customPrimary = value; await this.plugin.saveSettings(); });
+    new Setting(containerEl)
+      .setName('Use Custom Colors')
+      .setDesc('Override theme colors with your own')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.useCustomColors)
+        .onChange(async (value) => {
+          this.plugin.settings.useCustomColors = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }));
 
-    this.addColorSetting(containerEl, 'Secondary', 'Break state color', '#60a5fa',
-      this.plugin.settings.customSecondary,
-      async (value) => { this.plugin.settings.customSecondary = value; await this.plugin.saveSettings(); });
+    if (this.plugin.settings.useCustomColors) {
+      this.addColorSetting(containerEl, 'Primary', 'Focus ring and buttons', '#ef4444',
+        this.plugin.settings.customPrimary,
+        async (value) => { this.plugin.settings.customPrimary = value; await this.plugin.saveSettings(); });
 
-    this.addColorSetting(containerEl, 'Accent', 'Highlights and active states', '#ff006e',
-      this.plugin.settings.customAccentColor,
-      async (value) => { this.plugin.settings.customAccentColor = value; await this.plugin.saveSettings(); });
+      this.addColorSetting(containerEl, 'Secondary', 'Break state color', '#eab308',
+        this.plugin.settings.customSecondary,
+        async (value) => { this.plugin.settings.customSecondary = value; await this.plugin.saveSettings(); });
+
+      this.addColorSetting(containerEl, 'Accent', 'Highlights and active states', '#22c55e',
+        this.plugin.settings.customAccentColor,
+        async (value) => { this.plugin.settings.customAccentColor = value; await this.plugin.saveSettings(); });
+    }
 
     // Notifications
     containerEl.createEl('h2', { text: 'Notifications' });
 
     new Setting(containerEl)
-      .setName('System notifications')
+      .setName('System Notifications')
       .setDesc('OS-level notification when timer completes')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.notifySystem)

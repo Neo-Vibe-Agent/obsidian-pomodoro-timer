@@ -27,6 +27,7 @@ export interface PomodoroSettings {
   showInStatusBar: boolean;
 
   // Custom colors
+  useCustomColors: boolean;
   customPrimary: string;
   customSecondary: string;
   customAccentColor: string;
@@ -60,9 +61,10 @@ export const DEFAULT_SETTINGS: PomodoroSettings = {
   theme: 'default',
   timerSize: 'medium',
   showInStatusBar: true,
-  customPrimary: '',
-  customSecondary: '',
-  customAccentColor: '',
+  useCustomColors: false,
+  customPrimary: '#ef4444',
+  customSecondary: '#eab308',
+  customAccentColor: '#22c55e',
   scrollSensitivity: 3,
   notifyOnComplete: true,
   notifySound: true,
