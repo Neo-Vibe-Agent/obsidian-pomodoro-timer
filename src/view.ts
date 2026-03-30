@@ -493,18 +493,19 @@ export class PomodoroView extends ItemView {
         });
       }
 
-      // Click to activate (disabled when locked)
-      if (!isLocked) {
-        taskEl.addEventListener('click', () => {
-          this.plugin.setActiveTaskByName(name);
-          if (this.taskDisplay) {
-            this.taskDisplay.setText(name);
-            this.taskDisplay.toggleClass('has-task', true);
-          }
-          this.taskList.querySelectorAll('.pomodoro-task-item').forEach(el => el.removeClass('active'));
-          taskEl.addClass('active');
-        });
-      }
+      // Click to activate (always has listener, but checks running state)
+      taskEl.addEventListener('click', () => {
+        if (this.plugin.timer.isRunning()) return; // locked while running
+        const state = this.plugin.timer.getStatus().state;
+        if (state !== 'idle' && state !== 'paused') return; // also block during waiting breaks
+        this.plugin.setActiveTaskByName(name);
+        if (this.taskDisplay) {
+          this.taskDisplay.setText(name);
+          this.taskDisplay.toggleClass('has-task', true);
+        }
+        this.taskList.querySelectorAll('.pomodoro-task-item').forEach(el => el.removeClass('active'));
+        taskEl.addClass('active');
+      });
 
       // Highlight if this is the active task
       const activeTask = this.plugin.timer.getStatus().activeTask;
