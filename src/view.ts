@@ -31,6 +31,7 @@ export class PomodoroView extends ItemView {
   private lastRenderedState: string = '';
   private activePreset: number;
   private selectedMode: 'work' | 'short-break' | 'long-break' = 'work';
+  private localTasks: string[] = [];
   private _onMouseMove: ((e: MouseEvent) => void) | null = null;
   private _onMouseUp: (() => void) | null = null;
 
@@ -237,22 +238,22 @@ export class PomodoroView extends ItemView {
       cls: 'pomodoro-task-input',
       attr: { type: 'text', placeholder: 'Add a task...' }
     });
+
+    const addTaskToList = () => {
+      const name = taskInput.value.trim();
+      if (!name) return;
+      this.localTasks.push(name);
+      taskInput.value = '';
+      this.renderLocalTasks();
+    };
+
     taskInput.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && taskInput.value.trim()) {
-        this.plugin.setActiveTaskByName(taskInput.value.trim());
-        if (this.taskDisplay) { this.taskDisplay.setText(taskInput.value.trim()); this.taskDisplay.toggleClass('has-task', true); }
-        taskInput.value = '';
-      }
+      if (e.key === 'Enter') addTaskToList();
     });
+
     const taskAddBtn = taskInputWrapper.createEl('button', { cls: 'pomodoro-task-add-btn', attr: { 'aria-label': 'Add' } });
     taskAddBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-    taskAddBtn.addEventListener('click', () => {
-      if (taskInput.value.trim()) {
-        this.plugin.setActiveTaskByName(taskInput.value.trim());
-        if (this.taskDisplay) { this.taskDisplay.setText(taskInput.value.trim()); this.taskDisplay.toggleClass('has-task', true); }
-        taskInput.value = '';
-      }
-    });
+    taskAddBtn.addEventListener('click', addTaskToList);
 
     this.taskList = this.taskSection.createDiv({ cls: 'pomodoro-task-list' });
     taskHeader.addEventListener('click', () => {
@@ -442,15 +443,65 @@ export class PomodoroView extends ItemView {
     }
   }
 
-  async refreshTasks(): Promise<void> {
+  private renderLocalTasks(): void {
     if (!this.taskList) return;
     this.taskList.empty();
+
+    // Show local tasks first
+    for (let i = 0; i < this.localTasks.length; i++) {
+      const name = this.localTasks[i];
+      const taskEl = this.taskList.createDiv({ cls: 'pomodoro-task-item' });
+      taskEl.createSpan({ cls: 'pomodoro-task-text', text: name });
+
+      // Remove button
+      const removeBtn = taskEl.createSpan({ cls: 'pomodoro-task-remove' });
+      removeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.localTasks.splice(i, 1);
+        this.renderLocalTasks();
+      });
+
+      // Click to activate
+      taskEl.addEventListener('click', () => {
+        this.plugin.setActiveTaskByName(name);
+        if (this.taskDisplay) {
+          this.taskDisplay.setText(name);
+          this.taskDisplay.toggleClass('has-task', true);
+        }
+        this.taskList.querySelectorAll('.pomodoro-task-item').forEach(el => el.removeClass('active'));
+        taskEl.addClass('active');
+      });
+
+      // Highlight if this is the active task
+      const activeTask = this.plugin.timer.getStatus().activeTask;
+      if (activeTask === name) taskEl.addClass('active');
+    }
+
+    if (this.localTasks.length === 0) {
+      this.taskList.createDiv({ cls: 'pomodoro-no-tasks', text: 'No tasks yet' });
+    }
+  }
+
+  async refreshTasks(): Promise<void> {
+    // Render local tasks, then append vault tasks below if sync is enabled
+    this.renderLocalTasks();
+
+    if (!this.plugin.settings.taskSyncEnabled) return;
+
     let tasks;
     try { tasks = await this.plugin.taskSync.getTasks(); }
-    catch (e) { this.taskList.createDiv({ cls: 'pomodoro-no-tasks', text: 'Could not load tasks' }); return; }
-    if (tasks.length === 0) { this.taskList.createDiv({ cls: 'pomodoro-no-tasks', text: 'No tasks found' }); return; }
-    for (const task of tasks.slice(0, 25)) {
-      const taskEl = this.taskList.createDiv({ cls: 'pomodoro-task-item' });
+    catch (e) { return; }
+
+    if (tasks.length === 0) return;
+
+    // Add a separator if we have local tasks
+    if (this.localTasks.length > 0 && tasks.length > 0) {
+      this.taskList.createDiv({ cls: 'pomodoro-task-separator' });
+    }
+
+    for (const task of tasks.slice(0, 15)) {
+      const taskEl = this.taskList.createDiv({ cls: 'pomodoro-task-item pomodoro-vault-task' });
       taskEl.createSpan({ cls: 'pomodoro-task-text', text: task.text });
       if (task.estimatedPomodoros) {
         taskEl.createSpan({ cls: 'pomodoro-task-pomo-count', text: `${task.completedPomodoros || 0}/${task.estimatedPomodoros}` });

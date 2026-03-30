@@ -554,6 +554,40 @@ settings:
   margin-left: 8px;
 }
 
+.pomodoro-task-remove {
+  display: flex;
+  align-items: center;
+  color: var(--pomo-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.pomodoro-task-item:hover .pomodoro-task-remove {
+  opacity: 1;
+}
+
+.pomodoro-task-remove:hover {
+  color: var(--text-error);
+  background: var(--pomo-surface);
+}
+
+.pomodoro-task-separator {
+  height: 1px;
+  background: var(--pomo-border);
+  margin: 6px 10px;
+}
+
+.pomodoro-vault-task {
+  opacity: 0.7;
+}
+
+.pomodoro-vault-task:hover {
+  opacity: 1;
+}
+
 .pomodoro-no-tasks, .pomodoro-no-events {
   font-size: 0.8em;
   color: var(--pomo-muted);
