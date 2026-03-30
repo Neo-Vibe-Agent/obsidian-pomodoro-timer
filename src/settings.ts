@@ -256,10 +256,6 @@ export class PomodoroSettingTab extends PluginSettingTab {
       this.addColorSetting(containerEl, 'Break Color', 'Ring and buttons during short and long breaks', '#eab308',
         this.plugin.settings.customSecondary,
         async (value) => { this.plugin.settings.customSecondary = value; await this.plugin.saveSettings(); });
-
-      this.addColorSetting(containerEl, 'Accent', 'Labels, stats, inactive tabs', '#22c55e',
-        this.plugin.settings.customAccentColor,
-        async (value) => { this.plugin.settings.customAccentColor = value; await this.plugin.saveSettings(); });
     }
 
     // Notifications

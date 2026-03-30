@@ -264,11 +264,9 @@ export default class PomodoroPlugin extends Plugin {
       if (this.settings.useCustomColors) {
         if (this.settings.customPrimary) container.style.setProperty('--pomo-accent', this.settings.customPrimary);
         if (this.settings.customSecondary) container.style.setProperty('--pomo-break', this.settings.customSecondary);
-        if (this.settings.customAccentColor) container.style.setProperty('--pomo-muted', this.settings.customAccentColor);
       } else {
         container.style.removeProperty('--pomo-accent');
         container.style.removeProperty('--pomo-break');
-        container.style.removeProperty('--pomo-muted');
       }
       view.refreshTasks();
     }
