@@ -195,7 +195,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
     // Appearance
     containerEl.createEl('h2', { text: 'Appearance' });
 
-    new Setting(containerEl)
+    const themeSetting = new Setting(containerEl)
       .setName('Theme')
       .addDropdown(dropdown => dropdown
         .addOption('default', 'Default')
@@ -209,7 +209,12 @@ export class PomodoroSettingTab extends PluginSettingTab {
         .addOption('ocean', 'Ocean')
         .addOption('city', 'City')
         .setValue(this.plugin.settings.theme)
+        .setDisabled(this.plugin.settings.useCustomColors)
         .onChange(async (value: any) => { this.plugin.settings.theme = value; await this.plugin.saveSettings(); }));
+    if (this.plugin.settings.useCustomColors) {
+      themeSetting.setDesc('Disabled while custom colors are active');
+      themeSetting.settingEl.style.opacity = '0.5';
+    }
 
     new Setting(containerEl)
       .setName('Timer Size')

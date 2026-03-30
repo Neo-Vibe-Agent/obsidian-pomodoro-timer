@@ -394,9 +394,14 @@ export class PomodoroView extends ItemView {
     for (const preset of PRESETS) {
       const btn = this.presetBtns.createDiv({ cls: `pomodoro-preset ${this.activePreset === preset.minutes ? 'active' : ''}`, text: preset.label });
       btn.addEventListener('click', () => {
-        if (this.plugin.timer.getStatus().state !== 'idle') return;
+        if (this.plugin.timer.isRunning()) return;
+        const state = this.plugin.timer.getStatus().state;
+        if (state !== 'idle') this.plugin.timer.stop();
         this.activePreset = preset.minutes;
-        this.plugin.settings.workDuration = preset.minutes;
+        // Save to correct setting based on selected mode
+        if (this.selectedMode === 'short-break') this.plugin.settings.shortBreakDuration = preset.minutes;
+        else if (this.selectedMode === 'long-break') this.plugin.settings.longBreakDuration = preset.minutes;
+        else this.plugin.settings.workDuration = preset.minutes;
         this.plugin.saveSettings();
         this.timerDisplay.setText(formatTime(preset.minutes * 60));
         this.renderPresets();
