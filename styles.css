@@ -994,6 +994,11 @@ settings:
   box-shadow: 0 0 12px color-mix(in srgb, var(--pomo-accent) 40%, transparent);
 }
 
+.pomodoro-custom-colors .pomodoro-primary-short-break,
+.pomodoro-custom-colors .pomodoro-primary-long-break {
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.5), 0 0 32px rgba(168, 85, 247, 0.2);
+}
+
 .pomodoro-custom-colors .pomodoro-ring-state {
   color: var(--pomo-ring-color);
 }
