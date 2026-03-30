@@ -1,5 +1,5 @@
 import { Plugin, Notice, Platform } from 'obsidian';
-import { PomodoroSettings, DEFAULT_SETTINGS, TimerStatus, TaskItem } from './types';
+import { DEFAULT_SETTINGS, TimerStatus, TaskItem } from './types';
 import { PomodoroTimer } from './timer';
 import { TaskSync } from './task-sync';
 import { PomodoroSettingTab } from './settings';
@@ -8,7 +8,7 @@ import { formatTime, getStateLabel } from './utils/format';
 import { playSound } from './utils/sound';
 
 export default class PomodoroPlugin extends Plugin {
-  settings: PomodoroSettings;
+  settings = DEFAULT_SETTINGS;
   timer: PomodoroTimer;
   taskSync: TaskSync;
   private statusBarItem: HTMLElement | null = null;
@@ -20,7 +20,7 @@ export default class PomodoroPlugin extends Plugin {
 
     this.timer = new PomodoroTimer(this.settings, {
       onTick: (status) => this.handleTick(status),
-      onComplete: (status) => this.handleComplete(status),
+      onComplete: (status) => { void this.handleComplete(status); },
       onStateChange: (status) => this.handleStateChange(status),
     });
 
@@ -28,7 +28,7 @@ export default class PomodoroPlugin extends Plugin {
 
     this.registerView(POMODORO_VIEW_TYPE, (leaf) => new PomodoroView(leaf, this));
 
-    this.addRibbonIcon('timer', 'Pomodoro', () => this.activateView());
+    this.addRibbonIcon('timer', 'Pomodoro', () => { void this.activateView(); });
 
     // Status bar
     if (this.settings.showInStatusBar) {
@@ -44,8 +44,8 @@ export default class PomodoroPlugin extends Plugin {
         if (visible) {
           if (state !== 'idle') {
             this.updateStatusBar(`${getStateLabel(state)} ${formatTime(this.timer.getStatus().timeRemaining)}`);
-          } else {
-            this.statusBarItem!.setText(`${this.settings.timerName || 'Pomodoro'} (click to hide)`);
+          } else if (this.statusBarItem) {
+            this.statusBarItem.setText(`${this.settings.timerName || 'Pomodoro'} (click to hide)`);
           }
         }
         // hideView already sets "(click to show)"
@@ -57,18 +57,18 @@ export default class PomodoroPlugin extends Plugin {
     this.addCommand({ id: 'pause-pomodoro', name: 'Pause pomodoro', callback: () => this.pauseTimer() });
     this.addCommand({ id: 'stop-pomodoro', name: 'Stop pomodoro', callback: () => this.stopTimer() });
     this.addCommand({ id: 'skip-pomodoro', name: 'Skip to next phase', callback: () => this.skipTimer() });
-    this.addCommand({ id: 'open-pomodoro', name: 'Open Pomodoro panel', callback: () => this.activateView() });
+    this.addCommand({ id: 'open-pomodoro', name: 'Open Pomodoro panel', callback: () => { void this.activateView(); } });
     this.addCommand({ id: 'hide-pomodoro', name: 'Hide Pomodoro panel', callback: () => this.hideView() });
     this.addCommand({ id: 'toggle-pomodoro', name: 'Toggle Pomodoro panel', callback: () => this.toggleView() });
 
     if (Platform.isDesktop) {
-      this.addCommand({ id: 'popout-pomodoro', name: 'Pop out to floating window', callback: () => this.popoutTimer() });
+      this.addCommand({ id: 'popout-pomodoro', name: 'Pop out to floating window', callback: () => { void this.popoutTimer(); } });
     }
 
     this.addSettingTab(new PomodoroSettingTab(this.app, this));
   }
 
-  async onunload(): Promise<void> {
+  onunload(): void {
     this.timer.destroy();
   }
 
@@ -177,7 +177,11 @@ export default class PomodoroPlugin extends Plugin {
 
   toggleView(): void {
     const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    existing.length > 0 ? this.hideView() : this.activateView();
+    if (existing.length > 0) {
+      this.hideView();
+    } else {
+      void this.activateView();
+    }
   }
 
   async popoutTimer(): Promise<void> {
@@ -187,7 +191,13 @@ export default class PomodoroPlugin extends Plugin {
     const leaf = this.app.workspace.openPopoutLeaf({ size: { width: 340, height: 540 } });
     await leaf.setViewState({ type: POMODORO_VIEW_TYPE, active: true });
     this.app.workspace.revealLeaf(leaf);
-    setTimeout(() => { leaf.view?.containerEl?.win?.focus?.(); }, 200);
+    const popoutLeaf = leaf;
+    setTimeout(() => {
+      const win = popoutLeaf.view?.containerEl?.win;
+      if (win && typeof win.focus === 'function') {
+        win.focus();
+      }
+    }, 200);
   }
 
   async activateView(): Promise<void> {
@@ -212,11 +222,11 @@ export default class PomodoroPlugin extends Plugin {
     }
     if (this.settings.notifySystem && Platform.isDesktop) {
       try {
-        new Notification('Pomodoro Complete', {
+        new Notification('Pomodoro complete', {
           body: `${status.completedPomodoros} pomodoro${status.completedPomodoros !== 1 ? 's' : ''} completed.`,
           silent: !this.settings.notifySound,
         });
-      } catch (e) { /* not available */ }
+      } catch { /* not available */ }
     }
     if (this.settings.notifyOnComplete) {
       new Notice(`Pomodoro #${status.completedPomodoros} complete. ${getStateLabel(status.state)} time.`);

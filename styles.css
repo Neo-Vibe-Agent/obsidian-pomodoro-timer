@@ -1030,3 +1030,29 @@ settings:
   border-color: var(--pomo-text);
 }
 
+/* Settings: disabled state */
+.pomodoro-setting-disabled {
+  opacity: 0.5;
+}
+
+/* Icon sizing in header buttons */
+.pomodoro-header-btn .svg-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.pomodoro-task-remove .svg-icon {
+  width: 10px;
+  height: 10px;
+}
+
+.pomodoro-chevron .svg-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.pomodoro-task-add-btn .svg-icon {
+  width: 14px;
+  height: 14px;
+}
+

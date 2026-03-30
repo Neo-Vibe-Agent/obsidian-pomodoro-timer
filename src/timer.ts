@@ -105,9 +105,6 @@ export class PomodoroTimer {
   extend(minutes: number): void {
     this.status.totalTime += minutes * 60;
     this.status.timeRemaining += minutes * 60;
-    if (this.status.state === 'idle' || this.status.state === 'paused') {
-      // If paused/idle, just add time
-    }
     this.emitStateChange();
   }
 

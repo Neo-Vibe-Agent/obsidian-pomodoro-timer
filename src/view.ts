@@ -1,6 +1,6 @@
-import { ItemView, WorkspaceLeaf, Platform } from 'obsidian';
-import { TimerStatus, TaskItem } from './types';
-import { formatTime, getProgressPercentage, getStateLabel } from './utils/format';
+import { App, ItemView, WorkspaceLeaf, Platform, setIcon } from 'obsidian';
+import { TimerStatus } from './types';
+import { formatTime } from './utils/format';
 import type PomodoroPlugin from './main';
 
 export const POMODORO_VIEW_TYPE = 'pomodoro-view';
@@ -74,8 +74,8 @@ export class PomodoroView extends ItemView {
         cls: 'pomodoro-header-btn',
         attr: { 'aria-label': 'Pop out', title: 'Floating window' }
       });
-      popoutBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
-      popoutBtn.addEventListener('click', () => this.plugin.popoutTimer());
+      setIcon(popoutBtn, 'external-link');
+      popoutBtn.addEventListener('click', () => { void this.plugin.popoutTimer(); });
     }
 
     // Hide
@@ -83,7 +83,7 @@ export class PomodoroView extends ItemView {
       cls: 'pomodoro-header-btn',
       attr: { 'aria-label': 'Hide', title: 'Minimize to status bar' }
     });
-    hideBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+    setIcon(hideBtn, 'eye-off');
     hideBtn.addEventListener('click', () => this.plugin.hideView());
 
     // Settings
@@ -91,10 +91,11 @@ export class PomodoroView extends ItemView {
       cls: 'pomodoro-header-btn',
       attr: { 'aria-label': 'Settings', title: 'Settings' }
     });
-    settingsBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+    setIcon(settingsBtn, 'settings');
     settingsBtn.addEventListener('click', () => {
-      (this.app as any).setting?.open?.();
-      (this.app as any).setting?.openTabById?.('all-in-one-pomodoro');
+      const appWithSetting = this.app as App & { setting?: { open(): void; openTabById(id: string): void } };
+      appWithSetting.setting?.open();
+      appWithSetting.setting?.openTabById('all-in-one-pomodoro');
     });
 
     // Close
@@ -102,7 +103,7 @@ export class PomodoroView extends ItemView {
       cls: 'pomodoro-header-btn',
       attr: { 'aria-label': 'Close', title: 'Close' }
     });
-    closeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    setIcon(closeBtn, 'x');
     closeBtn.addEventListener('click', () => this.leaf.detach());
 
     // ===== MODE TABS =====
@@ -246,9 +247,9 @@ export class PomodoroView extends ItemView {
     // ===== TASK LIST (collapsible) =====
     this.taskSection = c.createDiv({ cls: 'pomodoro-task-section collapsed' });
     const taskHeader = this.taskSection.createDiv({ cls: 'pomodoro-section-header' });
-    taskHeader.createEl('h4', { text: 'Tasks', cls: 'pomodoro-section-title' });
+    taskHeader.createSpan({ cls: 'pomodoro-section-title', text: 'Tasks' });
     const taskChevron = taskHeader.createSpan({ cls: 'pomodoro-chevron' });
-    taskChevron.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+    setIcon(taskChevron, 'chevron-down');
 
     // Task input
     this.taskInputWrapper = this.taskSection.createDiv({ cls: 'pomodoro-task-input-wrapper' });
@@ -271,7 +272,7 @@ export class PomodoroView extends ItemView {
     });
 
     const taskAddBtn = taskInputWrapper.createEl('button', { cls: 'pomodoro-task-add-btn', attr: { 'aria-label': 'Add' } });
-    taskAddBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+    setIcon(taskAddBtn, 'plus');
     taskAddBtn.addEventListener('click', addTaskToList);
 
     this.taskList = this.taskSection.createDiv({ cls: 'pomodoro-task-list' });
@@ -283,6 +284,7 @@ export class PomodoroView extends ItemView {
   }
 
   async onClose(): Promise<void> {
+    await Promise.resolve();
     const doc = this.containerEl.doc;
     if (this._onMouseMove) doc.removeEventListener('mousemove', this._onMouseMove);
     if (this._onMouseUp) doc.removeEventListener('mouseup', this._onMouseUp);
@@ -350,9 +352,9 @@ export class PomodoroView extends ItemView {
     }
 
     // Lock/unlock task input and list based on running state
-    const isRunning = this.plugin.timer.isRunning();
+    const timerRunning = this.plugin.timer.isRunning();
     if (this.taskInputWrapper) {
-      this.taskInputWrapper.toggleClass('locked', isRunning);
+      this.taskInputWrapper.toggleClass('locked', timerRunning);
     }
 
     if (status.state !== this.lastRenderedState) {
@@ -368,9 +370,9 @@ export class PomodoroView extends ItemView {
     // Keep selectedMode in sync with the visual tab
     this.selectedMode = activeMode as 'work' | 'short-break' | 'long-break';
     const modes = [
-      { id: 'work', label: 'Focus Time' },
-      { id: 'short-break', label: 'Short Break' },
-      { id: 'long-break', label: 'Long Break' },
+      { id: 'work', label: 'Focus time' },
+      { id: 'short-break', label: 'Short break' },
+      { id: 'long-break', label: 'Long break' },
     ];
     for (const mode of modes) {
       const tab = this.modeTabs.createDiv({ cls: `pomodoro-mode-tab ${mode.id === activeMode ? 'active' : ''}`, text: mode.label });
@@ -382,7 +384,7 @@ export class PomodoroView extends ItemView {
         if (state !== 'idle') {
           this.plugin.timer.stop();
         }
-        this.selectedMode = mode.id as any;
+        this.selectedMode = mode.id as 'work' | 'short-break' | 'long-break';
         let minutes = this.plugin.settings.workDuration;
         if (mode.id === 'short-break') minutes = this.plugin.settings.shortBreakDuration;
         if (mode.id === 'long-break') minutes = this.plugin.settings.longBreakDuration;
@@ -418,7 +420,7 @@ export class PomodoroView extends ItemView {
         if (this.selectedMode === 'short-break') this.plugin.settings.shortBreakDuration = preset.minutes;
         else if (this.selectedMode === 'long-break') this.plugin.settings.longBreakDuration = preset.minutes;
         else this.plugin.settings.workDuration = preset.minutes;
-        this.plugin.saveSettings();
+        void this.plugin.saveSettings();
         this.timerDisplay.setText(formatTime(preset.minutes * 60));
         this.renderPresets();
         if (this.ringCircle) {
@@ -447,7 +449,7 @@ export class PomodoroView extends ItemView {
       else if (this.selectedMode === 'long-break') this.plugin.settings.longBreakDuration = next;
       else this.plugin.settings.workDuration = next;
 
-      this.plugin.saveSettings();
+      void this.plugin.saveSettings();
       this.timerDisplay.setText(formatTime(next * 60));
       this.activePreset = next;
       this.renderPresets();
@@ -480,7 +482,6 @@ export class PomodoroView extends ItemView {
     };
 
     const ext = this.plugin.settings.extendMinutes || 5;
-    const hasTask = !!(this.plugin.timer.getStatus().activeTask);
 
     let effectiveState = state;
     if (state === 'paused') {
@@ -491,7 +492,7 @@ export class PomodoroView extends ItemView {
     if (effectiveState === 'work') {
       createBtn(`+${ext}m`, 'pomodoro-btn-extend', () => this.plugin.extendTimer(ext));
       createBtn('Done', 'pomodoro-btn-done', () => this.plugin.markTaskDone());
-      createBtn('Skip to Break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
+      createBtn('Skip to break', 'pomodoro-btn-skip', () => this.plugin.skipTimer());
       createBtn('Reset', 'pomodoro-btn-reset', () => this.plugin.stopTimer());
     } else {
       createBtn(`+${ext}m`, 'pomodoro-btn-extend', () => this.plugin.extendTimer(ext));
@@ -540,7 +541,7 @@ export class PomodoroView extends ItemView {
 
       // Remove button (always available)
       const removeBtn = taskEl.createSpan({ cls: 'pomodoro-task-remove' });
-      removeBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      setIcon(removeBtn, 'x');
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.plugin.localTasks.splice(i, 1);
@@ -579,7 +580,7 @@ export class PomodoroView extends ItemView {
 
     let tasks;
     try { tasks = await this.plugin.taskSync.getTasks(); }
-    catch (e) { return; }
+    catch { return; }
 
     if (tasks.length === 0) return;
 
