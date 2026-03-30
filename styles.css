@@ -975,11 +975,11 @@ settings:
 
 /* When custom colors are on, use a neutral dark base like cyberpunk */
 .pomodoro-custom-colors {
-  --pomo-bg: #1a1a2e;
-  --pomo-text: #e8e8f0;
-  --pomo-muted: #8888aa;
-  --pomo-border: #2a2a40;
-  --pomo-surface: #22223a;
+  --pomo-bg: #1e1e1e;
+  --pomo-text: #e8e8e8;
+  --pomo-muted: #888888;
+  --pomo-border: #333333;
+  --pomo-surface: #2a2a2a;
 }
 
 .pomodoro-custom-colors .pomodoro-timer-display {
