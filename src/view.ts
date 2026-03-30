@@ -307,7 +307,16 @@ export class PomodoroView extends ItemView {
         this.container.addClass('pomodoro-phase-transition');
         setTimeout(() => this.container.removeClass('pomodoro-phase-transition'), 600);
       }
-      this.renderModeTabs(status.state === 'short-break' || status.state === 'long-break' ? status.state : 'work');
+      // Keep correct tab highlighted based on actual mode (not just state)
+      let tabMode = 'work';
+      if (status.state === 'short-break' || status.state === 'long-break') {
+        tabMode = status.state;
+      } else if (status.state === 'paused') {
+        // When paused, show the tab of whatever was running
+        const prev = this.plugin.timer.getPreviousState();
+        if (prev === 'short-break' || prev === 'long-break') tabMode = prev;
+      }
+      this.renderModeTabs(tabMode);
       if (this.presetBtns) this.presetBtns.toggleClass('hidden', status.state !== 'idle');
     }
 
