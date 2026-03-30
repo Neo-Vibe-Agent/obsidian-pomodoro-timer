@@ -387,7 +387,7 @@ settings:
 
 /* ===== ACTIVE TASK ===== */
 .pomodoro-active-task {
-  font-size: 0.85em;
+  font-size: 0.82em;
   color: var(--pomo-text);
   text-align: center;
   padding: 0 16px;
@@ -396,11 +396,14 @@ settings:
 }
 
 .pomodoro-active-task.has-task {
-  padding: 8px 16px;
-  margin: 4px 12px;
-  background: var(--pomo-surface);
-  border-radius: 6px;
-  border-left: 3px solid var(--pomo-accent);
+  padding: 8px 14px;
+  margin: 4px 12px 8px;
+  background: var(--pomo-accent);
+  color: var(--pomo-bg);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
 }
 
 /* ===== TASK INPUT ===== */
