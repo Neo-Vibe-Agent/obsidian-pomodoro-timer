@@ -691,7 +691,9 @@ settings:
 }
 
 .pomodoro-theme-neon .pomodoro-primary-btn {
-  box-shadow: 0 0 16px color-mix(in srgb, var(--pomo-accent) 50%, transparent);
+  background: #00f5d4;
+  color: #0a0a1a;
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.4), 0 0 32px rgba(0, 245, 212, 0.15);
 }
 
 /* Minimal */
@@ -710,8 +712,8 @@ settings:
 
 /* Forest */
 .pomodoro-theme-forest {
-  --pomo-accent: #4a7c59;
-  --pomo-break: #8fbc8f;
+  --pomo-accent: #7ab88a;
+  --pomo-break: #4a7c59;
   --pomo-bg: var(--background-primary);
   --pomo-text: var(--text-normal);
   --pomo-border: #3a5a3a;
@@ -741,12 +743,12 @@ settings:
 /* Matrix */
 .pomodoro-theme-matrix {
   --pomo-accent: #00ff41;
-  --pomo-break: #008f11;
+  --pomo-break: #00bb30;
   --pomo-bg: #000000;
   --pomo-text: #00ff41;
-  --pomo-muted: #005500;
-  --pomo-border: #002200;
-  --pomo-surface: #001100;
+  --pomo-muted: #00aa28;
+  --pomo-border: #003300;
+  --pomo-surface: #001a00;
 }
 
 .pomodoro-theme-matrix .pomodoro-timer-display {
@@ -781,7 +783,16 @@ settings:
   filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.4)) drop-shadow(0 0 24px rgba(0, 212, 255, 0.15));
 }
 
-.pomodoro-theme-cyberpunk .pomodoro-primary-btn {
+/* Cyberpunk: focus = pink glow on start button, break = blue glow */
+.pomodoro-theme-cyberpunk .pomodoro-primary-idle,
+.pomodoro-theme-cyberpunk .pomodoro-primary-work {
+  background: #ff2d95;
+  box-shadow: 0 0 16px rgba(255, 45, 149, 0.4), 0 0 32px rgba(255, 45, 149, 0.15);
+}
+
+.pomodoro-theme-cyberpunk .pomodoro-primary-short-break,
+.pomodoro-theme-cyberpunk .pomodoro-primary-long-break {
+  background: #00d4ff;
   box-shadow: 0 0 16px rgba(0, 212, 255, 0.3), 0 0 32px rgba(0, 212, 255, 0.1);
 }
 
@@ -791,6 +802,12 @@ settings:
 
 .pomodoro-theme-cyberpunk .pomodoro-cycle-dot.filled {
   box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+/* Cyberpunk: active task has pink accent */
+.pomodoro-theme-cyberpunk .pomodoro-active-task.has-task {
+  background: #ff2d95;
+  color: #0a0014;
 }
 
 /* Angel */
@@ -826,6 +843,26 @@ settings:
 
 .pomodoro-theme-angel .pomodoro-secondary-btn {
   border-color: #c4a862;
+  color: #6a5e48;
+}
+
+/* Angel: task visibility fix */
+.pomodoro-theme-angel .pomodoro-task-item {
+  color: #2a2520;
+}
+
+.pomodoro-theme-angel .pomodoro-task-input {
+  color: #2a2520;
+  background: #efe8d8;
+  border-color: #c4b890;
+}
+
+.pomodoro-theme-angel .pomodoro-active-task.has-task {
+  background: #c4a862;
+  color: #2a2520;
+}
+
+.pomodoro-theme-angel .pomodoro-no-tasks {
   color: #8a7e68;
 }
 
