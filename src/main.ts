@@ -113,6 +113,9 @@ export default class PomodoroPlugin extends Plugin {
     } else {
       new Notice('Session complete');
     }
+    // Reset to idle focus, don't go to break
+    this.timer.stop();
+    this.updateStatusBar('Ready');
     this.updateView(this.timer.getStatus());
   }
 

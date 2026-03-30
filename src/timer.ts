@@ -102,10 +102,6 @@ export class PomodoroTimer {
   skip(): void {
     this.stopInterval();
     this.handlePhaseComplete();
-    // Always start the next phase when skipping (user intent is clear)
-    if (!this.interval) {
-      this.startInterval();
-    }
   }
 
   extend(minutes: number): void {
@@ -123,6 +119,19 @@ export class PomodoroTimer {
 
   getStatus(): TimerStatus {
     return { ...this.status };
+  }
+
+  beginPhase(): void {
+    // Start the current phase (used when break is waiting for user to press Start)
+    if (this.interval) return; // already running
+    this.status.startedAt = Date.now();
+    this.pausedElapsed = 0;
+    this.startInterval();
+    this.emitStateChange();
+  }
+
+  isRunning(): boolean {
+    return this.interval !== null;
   }
 
   getPreviousState(): TimerState {

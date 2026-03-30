@@ -149,9 +149,11 @@ export class PomodoroView extends ItemView {
     this.ringWrapper.addEventListener('mousemove', () => { clickBlocked = true; });
     this.ringWrapper.addEventListener('click', () => {
       if (clickBlocked) return;
+      const running = this.plugin.timer.isRunning();
       const state = this.plugin.timer.getStatus().state;
       if (state === 'idle') this.plugin.startTimer(this.selectedMode);
       else if (state === 'paused') this.plugin.resumeTimer();
+      else if (!running) this.plugin.timer.beginPhase();  // break waiting to start
       else this.plugin.pauseTimer();
     });
 
@@ -204,8 +206,10 @@ export class PomodoroView extends ItemView {
     this.primaryBtn = timerSection.createEl('button', { cls: 'pomodoro-primary-btn', text: 'Start' });
     this.primaryBtn.addEventListener('click', () => {
       const state = this.plugin.timer.getStatus().state;
+      const running = this.plugin.timer.isRunning();
       if (state === 'idle') this.plugin.startTimer(this.selectedMode);
       else if (state === 'paused') this.plugin.resumeTimer();
+      else if (!running) this.plugin.timer.beginPhase();
       else this.plugin.pauseTimer();
     });
 
@@ -294,8 +298,12 @@ export class PomodoroView extends ItemView {
     }
 
     if (this.primaryBtn) {
-      const btnText: Record<string, string> = { 'idle': 'Start', 'work': 'Pause', 'short-break': 'Pause', 'long-break': 'Pause', 'paused': 'Resume' };
-      this.primaryBtn.setText(btnText[status.state] || 'Start');
+      // If timer is ticking, show Pause. If not ticking (idle, waiting-to-start break, paused), show Start/Resume.
+      const isRunning = this.plugin.timer.isRunning();
+      let btnText = 'Start';
+      if (isRunning) btnText = 'Pause';
+      else if (status.state === 'paused') btnText = 'Resume';
+      this.primaryBtn.setText(btnText);
       this.primaryBtn.className = `pomodoro-primary-btn pomodoro-primary-${status.state}`;
     }
 
