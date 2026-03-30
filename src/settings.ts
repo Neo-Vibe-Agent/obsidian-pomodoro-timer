@@ -13,6 +13,42 @@ export class PomodoroSettingTab extends PluginSettingTab {
     this.debouncedSave = debounce(() => this.plugin.saveSettings(), 300, true);
   }
 
+  private addColorSetting(container: HTMLElement, name: string, desc: string, placeholder: string, value: string, onChange: (val: string) => void): void {
+    const setting = new Setting(container).setName(name).setDesc(desc);
+
+    // Color picker (native OS picker)
+    const pickerEl = setting.controlEl.createEl('input', {
+      attr: { type: 'color', value: value || placeholder }
+    });
+    pickerEl.classList.add('pomodoro-color-picker');
+    pickerEl.addEventListener('input', (e) => {
+      const hex = (e.target as HTMLInputElement).value;
+      textEl.value = hex;
+      onChange(hex);
+    });
+
+    // Text input for manual hex entry
+    const textEl = setting.controlEl.createEl('input', {
+      cls: 'pomodoro-color-text',
+      attr: { type: 'text', placeholder, value: value || '' }
+    });
+    textEl.addEventListener('change', () => {
+      const hex = textEl.value.trim();
+      if (hex && /^#[0-9a-fA-F]{3,8}$/.test(hex)) {
+        pickerEl.value = hex;
+      }
+      onChange(hex);
+    });
+
+    // Clear button
+    const clearBtn = setting.controlEl.createEl('button', { text: 'Clear', cls: 'pomodoro-color-clear' });
+    clearBtn.addEventListener('click', () => {
+      textEl.value = '';
+      pickerEl.value = placeholder;
+      onChange('');
+    });
+  }
+
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
@@ -197,23 +233,17 @@ export class PomodoroSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', { text: 'Custom Colors' });
     containerEl.createEl('p', { text: 'Override theme colors. Leave empty to use theme defaults.', cls: 'setting-item-description' });
 
-    new Setting(containerEl)
-      .setName('Primary')
-      .setDesc('Focus ring and buttons')
-      .addText(text => text.setPlaceholder('#2dd4a8').setValue(this.plugin.settings.customPrimary)
-        .onChange(async (value) => { this.plugin.settings.customPrimary = value; await this.plugin.saveSettings(); }));
+    this.addColorSetting(containerEl, 'Primary', 'Focus ring and buttons', '#2dd4a8',
+      this.plugin.settings.customPrimary,
+      async (value) => { this.plugin.settings.customPrimary = value; await this.plugin.saveSettings(); });
 
-    new Setting(containerEl)
-      .setName('Secondary')
-      .setDesc('Break state color')
-      .addText(text => text.setPlaceholder('#60a5fa').setValue(this.plugin.settings.customSecondary)
-        .onChange(async (value) => { this.plugin.settings.customSecondary = value; await this.plugin.saveSettings(); }));
+    this.addColorSetting(containerEl, 'Secondary', 'Break state color', '#60a5fa',
+      this.plugin.settings.customSecondary,
+      async (value) => { this.plugin.settings.customSecondary = value; await this.plugin.saveSettings(); });
 
-    new Setting(containerEl)
-      .setName('Accent')
-      .setDesc('Highlights and active states')
-      .addText(text => text.setPlaceholder('#ff006e').setValue(this.plugin.settings.customAccentColor)
-        .onChange(async (value) => { this.plugin.settings.customAccentColor = value; await this.plugin.saveSettings(); }));
+    this.addColorSetting(containerEl, 'Accent', 'Highlights and active states', '#ff006e',
+      this.plugin.settings.customAccentColor,
+      async (value) => { this.plugin.settings.customAccentColor = value; await this.plugin.saveSettings(); });
 
     // Notifications
     containerEl.createEl('h2', { text: 'Notifications' });

@@ -641,6 +641,52 @@ settings:
   white-space: nowrap;
 }
 
+/* ===== COLOR PICKER ===== */
+.pomodoro-color-picker {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+
+.pomodoro-color-picker::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.pomodoro-color-picker::-webkit-color-swatch {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.pomodoro-color-text {
+  width: 80px;
+  padding: 4px 8px;
+  font-size: 0.85em;
+  font-family: var(--font-monospace);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.pomodoro-color-clear {
+  padding: 4px 8px;
+  font-size: 0.8em;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.pomodoro-color-clear:hover {
+  color: var(--text-error);
+  border-color: var(--text-error);
+}
+
 /* ===== STATUS BAR ===== */
 .pomodoro-statusbar { cursor: pointer; }
 .pomodoro-statusbar:hover { color: var(--pomo-accent); }

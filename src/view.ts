@@ -349,6 +349,8 @@ export class PomodoroView extends ItemView {
   private renderModeTabs(activeMode: string): void {
     if (!this.modeTabs) return;
     this.modeTabs.empty();
+    // Keep selectedMode in sync with the visual tab
+    this.selectedMode = activeMode as 'work' | 'short-break' | 'long-break';
     const modes = [
       { id: 'work', label: 'Focus Time' },
       { id: 'short-break', label: 'Short Break' },
