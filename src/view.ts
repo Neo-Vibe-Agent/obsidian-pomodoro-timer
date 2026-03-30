@@ -152,21 +152,13 @@ export class PomodoroView extends ItemView {
       if (clickBlocked) return;
       const running = this.plugin.timer.isRunning();
       const state = this.plugin.timer.getStatus().state;
-      if (state === 'idle') {
-        this.plugin.startTimer(this.selectedMode);
+      if (running) {
+        this.plugin.pauseTimer();
       } else if (state === 'paused') {
         this.plugin.resumeTimer();
-      } else if (!running) {
-        // Not running, not idle, not paused = waiting break/phase
-        // If user selected Focus Time tab, start fresh focus instead of the waiting break
-        if (this.selectedMode === 'work') {
-          this.plugin.stopTimer();
-          this.plugin.startTimer('work');
-        } else {
-          this.plugin.timer.beginPhase();
-        }
       } else {
-        this.plugin.pauseTimer();
+        // Idle or waiting break: always start whatever mode is selected
+        this.plugin.startTimer(this.selectedMode);
       }
     });
 
@@ -220,21 +212,15 @@ export class PomodoroView extends ItemView {
     // ===== PRIMARY BUTTON =====
     this.primaryBtn = timerSection.createEl('button', { cls: 'pomodoro-primary-btn', text: 'Start' });
     this.primaryBtn.addEventListener('click', () => {
-      const state = this.plugin.timer.getStatus().state;
       const running = this.plugin.timer.isRunning();
-      if (state === 'idle') {
-        this.plugin.startTimer(this.selectedMode);
+      const state = this.plugin.timer.getStatus().state;
+      if (running) {
+        this.plugin.pauseTimer();
       } else if (state === 'paused') {
         this.plugin.resumeTimer();
-      } else if (!running) {
-        if (this.selectedMode === 'work') {
-          this.plugin.stopTimer();
-          this.plugin.startTimer('work');
-        } else {
-          this.plugin.timer.beginPhase();
-        }
       } else {
-        this.plugin.pauseTimer();
+        // Idle or waiting break: always start whatever mode is selected
+        this.plugin.startTimer(this.selectedMode);
       }
     });
 

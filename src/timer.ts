@@ -46,10 +46,8 @@ export class PomodoroTimer {
   }
 
   start(task?: string, mode?: 'work' | 'short-break' | 'long-break'): void {
-    if (this.status.state === 'paused') {
-      this.resume();
-      return;
-    }
+    // Always start fresh with the given mode (stop any existing timer)
+    this.stopInterval();
 
     const targetMode = mode || 'work';
     let duration: number;
