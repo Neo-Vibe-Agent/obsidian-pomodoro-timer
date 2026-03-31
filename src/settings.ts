@@ -179,14 +179,14 @@ export class PomodoroSettingTab extends PluginSettingTab {
         new Setting(containerEl)
           .setName('Task file path')
           .addText(text => text
-            .setPlaceholder('tasks.md')
+            .setPlaceholder('Tasks.md')
             .setValue(this.plugin.settings.customTaskPath)
             .onChange((value) => { this.plugin.settings.customTaskPath = value; void this.plugin.saveSettings(); }));
       }
 
       new Setting(containerEl)
         .setName('Log completed pomodoros')
-        .setDesc('Write session log to a markdown file')
+        .setDesc('Write session log to a Markdown file')
         .addToggle(toggle => toggle
           .setValue(this.plugin.settings.logCompletedPomodoros)
           .onChange((value) => { this.plugin.settings.logCompletedPomodoros = value; void this.plugin.saveSettings(); }));
@@ -263,7 +263,7 @@ export class PomodoroSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('System notifications')
-      .setDesc('OS-level notification when timer completes')
+      .setDesc('Notification when timer completes')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.notifySystem)
         .onChange((value) => { this.plugin.settings.notifySystem = value; void this.plugin.saveSettings(); }));

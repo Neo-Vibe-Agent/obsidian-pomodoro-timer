@@ -57,9 +57,9 @@ export default class PomodoroPlugin extends Plugin {
     this.addCommand({ id: 'pause-pomodoro', name: 'Pause pomodoro', callback: () => this.pauseTimer() });
     this.addCommand({ id: 'stop-pomodoro', name: 'Stop pomodoro', callback: () => this.stopTimer() });
     this.addCommand({ id: 'skip-pomodoro', name: 'Skip to next phase', callback: () => this.skipTimer() });
-    this.addCommand({ id: 'open-pomodoro', name: 'Open Pomodoro panel', callback: () => { void this.activateView(); } });
-    this.addCommand({ id: 'hide-pomodoro', name: 'Hide Pomodoro panel', callback: () => this.hideView() });
-    this.addCommand({ id: 'toggle-pomodoro', name: 'Toggle Pomodoro panel', callback: () => this.toggleView() });
+    this.addCommand({ id: 'open-pomodoro', name: 'Open pomodoro panel', callback: () => { void this.activateView(); } });
+    this.addCommand({ id: 'hide-pomodoro', name: 'Hide pomodoro panel', callback: () => this.hideView() });
+    this.addCommand({ id: 'toggle-pomodoro', name: 'Toggle pomodoro panel', callback: () => this.toggleView() });
 
     if (Platform.isDesktop) {
       this.addCommand({ id: 'popout-pomodoro', name: 'Pop out to floating window', callback: () => { void this.popoutTimer(); } });
@@ -190,7 +190,7 @@ export default class PomodoroPlugin extends Plugin {
     for (const leaf of existing) leaf.detach();
     const leaf = this.app.workspace.openPopoutLeaf({ size: { width: 340, height: 540 } });
     await leaf.setViewState({ type: POMODORO_VIEW_TYPE, active: true });
-    this.app.workspace.revealLeaf(leaf);
+    await this.app.workspace.revealLeaf(leaf);
     const popoutLeaf = leaf;
     setTimeout(() => {
       const win = popoutLeaf.view?.containerEl?.win;
@@ -202,11 +202,11 @@ export default class PomodoroPlugin extends Plugin {
 
   async activateView(): Promise<void> {
     const existing = this.app.workspace.getLeavesOfType(POMODORO_VIEW_TYPE);
-    if (existing.length > 0) { this.app.workspace.revealLeaf(existing[0]); return; }
+    if (existing.length > 0) { await this.app.workspace.revealLeaf(existing[0]); return; }
     const leaf = this.app.workspace.getRightLeaf(false);
     if (leaf) {
       await leaf.setViewState({ type: POMODORO_VIEW_TYPE, active: true });
-      this.app.workspace.revealLeaf(leaf);
+      await this.app.workspace.revealLeaf(leaf);
     }
   }
 
@@ -256,7 +256,7 @@ export default class PomodoroPlugin extends Plugin {
 
   // Settings
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<typeof DEFAULT_SETTINGS>);
   }
 
   async saveSettings(): Promise<void> {
